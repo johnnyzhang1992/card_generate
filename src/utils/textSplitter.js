@@ -194,24 +194,29 @@ export const splitTextToCards = (text, cardStyle) => {
       continue
     }
 
-    // 情况3：剩余空间不足，但段落可以放入一张新卡片
-    // 保存当前卡片，开始新卡片放入整个段落（不拆分）
+    // 情况3：剩余空间不足
     if (remainingSpace < paragraphMetrics.height) {
-      console.log('[Pretext] Paragraph doesn\'t fit in remaining space, starting new card')
-      
-      // 保存当前卡片（如果有内容）
-      if (currentCardContent.length > 0) {
-        cards.push([...currentCardContent])
-        console.log('[Pretext] Saved current card with', currentCardContent.length, 'paragraphs')
-        currentCardContent = []
-        currentCardHeight = 0
+      // 如果段落本身可以放入一张新卡片（不需要跨卡片分割）
+      if (paragraphMetrics.height <= availableHeight) {
+        console.log('[Pretext] Paragraph fits in new card, moving entire paragraph')
+        
+        // 保存当前卡片
+        if (currentCardContent.length > 0) {
+          cards.push([...currentCardContent])
+          console.log('[Pretext] Saved current card with', currentCardContent.length, 'paragraphs')
+          currentCardContent = []
+          currentCardHeight = 0
+        }
+        
+        // 将整个段落放入新卡片
+        currentCardContent.push(paragraph)
+        currentCardHeight = paragraphMetrics.height
+        console.log('[Pretext] Started new card with entire paragraph')
+        continue
       }
       
-      // 将整个段落放入新卡片
-      currentCardContent.push(paragraph)
-      currentCardHeight = paragraphMetrics.height
-      console.log('[Pretext] Started new card with entire paragraph')
-      continue
+      // 否则段落需要跨卡片分割（由情况2处理）
+      console.log('[Pretext] Paragraph exceeds card height, splitting across cards')
     }
   }
 
