@@ -223,10 +223,10 @@ export const splitTextToCards = (text, cardStyle) => {
         const partHeight = linesToAdd.length * lineHeight
         const remainingHeight = remainingLines.length * lineHeight
 
-        // 构建当前卡片的文本（每行加前缀，用换行符连接）
-        const partText = linesToAdd.map(l => l.text).join('\n')
-        const partWithMarkers = partText.split('\n').map(line => markerPrefix + line).join('\n')
-        currentCardContent.push(partWithMarkers)
+        // 构建段落文本：所有行合并为一个字符串，行间用空格连接（不是\n）
+        const partText = linesToAdd.map(l => l.text).join(' ')
+        const partWithMarker = markerPrefix + partText
+        currentCardContent.push(partWithMarker)
         currentCardHeight += partHeight
         console.log('[Pretext] Added', linesToAdd.length, 'lines to current card')
 
@@ -237,9 +237,9 @@ export const splitTextToCards = (text, cardStyle) => {
         currentCardHeight = 0
 
         // 构建新卡片的文本
-        const remainingText = remainingLines.map(l => l.text).join('\n')
-        const remainingWithMarkers = remainingText.split('\n').map(line => markerPrefix + line).join('\n')
-        currentCardContent.push(remainingWithMarkers)
+        const remainingText = remainingLines.map(l => l.text).join(' ')
+        const remainingWithMarker = markerPrefix + remainingText
+        currentCardContent.push(remainingWithMarker)
         currentCardHeight = remainingHeight
         console.log('[Pretext] Added remaining', remainingLines.length, 'lines to new card')
       }
