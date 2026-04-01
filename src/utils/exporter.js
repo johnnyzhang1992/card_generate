@@ -48,7 +48,7 @@ const createExportCard = (cardContent, cardStyle) => {
     // 检测段落格式并设置字体大小和间距
     let fontSize = cardStyle.fontSize
     let lineSpacing = cardStyle.lineSpacing
-    let paragraphText = paragraph.trim()
+    let paragraphText = paragraph
 
     // 设置左边距变量
     let paddingLeft = 0
@@ -58,6 +58,8 @@ const createExportCard = (cardContent, cardStyle) => {
     let textAlign = 'left'
 
     // 第一步：处理对齐方式（独立处理，不与其他格式冲突）
+    // 先trim再检测，避免空白干扰
+    const trimmedParagraph = paragraph.trim()
     // :开头 → 左对齐（必须有空格区分中文冒号）
     const leftAlignPattern = /^\s*:\s+(.+)/
     // :开头:结尾 → 居中对齐
@@ -65,27 +67,29 @@ const createExportCard = (cardContent, cardStyle) => {
     // 文字:结尾 → 右对齐（必须有空格区分中文冒号）
     const rightAlignPattern = /^\s*(.+?)\s+:\s*$/
 
-    // 使用已trim的文本进行对齐检测
-    if (centerAlignPattern.test(paragraphText)) {
+    if (centerAlignPattern.test(trimmedParagraph)) {
       // :文字 : 居中对齐（冒号前后都要有空格）
       textAlign = 'center'
-      paragraphText = paragraphText.replace(centerAlignPattern, '$1').trim()
-    } else if (leftAlignPattern.test(paragraphText)) {
+      paragraphText = trimmedParagraph.replace(centerAlignPattern, '$1').trim()
+    } else if (leftAlignPattern.test(trimmedParagraph)) {
       // : 文字 左对齐（注意：需要先匹配居中，因为居中也以:开头）
       textAlign = 'left'
-      paragraphText = paragraphText.replace(leftAlignPattern, '$1').trim()
-    } else if (rightAlignPattern.test(paragraphText)) {
+      paragraphText = trimmedParagraph.replace(leftAlignPattern, '$1').trim()
+    } else if (rightAlignPattern.test(trimmedParagraph)) {
       // 文字 : 右对齐（冒号前后都要有空格）
       textAlign = 'right'
-      paragraphText = paragraphText.replace(rightAlignPattern, '$1').trim()
+      paragraphText = trimmedParagraph.replace(rightAlignPattern, '$1').trim()
+    } else {
+      // 如果没有匹配任何对齐模式，使用默认左对齐，但保留原始文本
+      paragraphText = trimmedParagraph
     }
 
     // 第二步：处理引用（可以与其他格式组合）
     const quotePattern = /^\s*>\s*/
     if (quotePattern.test(paragraphText)) {
-      // 字体0.9倍，透明度0.85，间距0.5倍
+      // 字体0.9倍，透明度0.8，间距0.5倍
       fontSize = cardStyle.fontSize * 0.9
-      opacity = 0.85
+      opacity = 0.8
       lineSpacing = cardStyle.lineSpacing * 0.5
       // 移除>标记
       paragraphText = paragraphText.replace(quotePattern, '')
@@ -151,6 +155,8 @@ const createExportCard = (cardContent, cardStyle) => {
       container.style.opacity = opacity
     }
     container.style.textAlign = textAlign
+    container.style.width = '100%'
+    container.style.boxSizing = 'border-box'
     
     // 处理空行：空行显示为透明占位符
     if (paragraphText === '') {
@@ -158,7 +164,7 @@ const createExportCard = (cardContent, cardStyle) => {
       container.style.marginBottom = (i === cardContent.length - 1) ? '0px' : `${lineSpacing}px`
     } else {
       // 简单的 Markdown 支持：粗体、斜体、代码
-      const htmlText = parseMarkdownToHtml(paragraphText)
+      const htmlText = parseMarkdownToHtml(paragraphText.trim())
       container.innerHTML = htmlText
     }
     
