@@ -31,8 +31,9 @@ const createExportCard = (cardContent, cardStyle) => {
   card.style.justifyContent = 'flex-start'
   card.style.textAlign = 'left'
   card.style.whiteSpace = 'pre-wrap'
+  card.style.position = 'relative'
   card.style.overflow = 'hidden'
-  
+
   // 添加背景图片
   if (cardStyle.backgroundImage) {
     card.style.backgroundImage = `url(${cardStyle.backgroundImage})`
@@ -40,6 +41,12 @@ const createExportCard = (cardContent, cardStyle) => {
     card.style.backgroundPosition = 'center'
     card.style.backgroundRepeat = 'no-repeat'
   }
+
+  // 创建内容包装器
+  const contentWrapper = document.createElement('div')
+  contentWrapper.style.flex = '1'
+  contentWrapper.style.width = '100%'
+  contentWrapper.style.overflow = 'hidden'
 
   // 添加文本内容
   cardContent.forEach((paragraph, i) => {
@@ -168,8 +175,27 @@ const createExportCard = (cardContent, cardStyle) => {
       container.innerHTML = htmlText
     }
     
-    card.appendChild(container)
+    contentWrapper.appendChild(container)
   })
+
+  card.appendChild(contentWrapper)
+
+  // 添加底部版权信息
+  if (cardStyle.copyrightText) {
+    const copyrightEl = document.createElement('div')
+    copyrightEl.style.position = 'absolute'
+    copyrightEl.style.bottom = `${cardStyle.copyrightBottom}px`
+    copyrightEl.style.left = '0'
+    copyrightEl.style.right = '0'
+    copyrightEl.style.textAlign = 'center'
+    copyrightEl.style.fontSize = `${cardStyle.copyrightFontSize}px`
+    copyrightEl.style.color = cardStyle.textColor
+    copyrightEl.style.fontFamily = cardStyle.fontFamily
+    copyrightEl.style.opacity = '0.7'
+    copyrightEl.style.pointerEvents = 'none'
+    copyrightEl.textContent = cardStyle.copyrightText
+    card.appendChild(copyrightEl)
+  }
 
   return card
 }
@@ -231,8 +257,9 @@ export const exportCards = async (cardStyle, cards) => {
         })
         
         // 触发下载
+        const timestamp = Date.now()
         const link = document.createElement('a')
-        link.download = `card-${index + 1}.png`
+        link.download = `card_${timestamp}.png`
         link.href = canvas.toDataURL('image/png')
         link.click()
         

@@ -157,7 +157,7 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
   
   return (
     <div
-      className="text-card bg-white shadow-lg"
+      className="text-card bg-white shadow-lg relative"
       style={{
         width: cardStyle.width,
         height: cardStyle.height,
@@ -181,133 +181,154 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
         boxSizing: 'border-box'
       }}
     >
-      {paragraphs.map((paragraph, i) => {
-        // 检测段落格式并设置字体大小和间距
-        let fontSize = cardStyle.fontSize
-        let lineSpacing = cardStyle.lineSpacing
-        let paragraphText = paragraph
+      <div className="flex-1 w-full overflow-hidden">
+        {paragraphs.map((paragraph, i) => {
+          // 检测段落格式并设置字体大小和间距
+          let fontSize = cardStyle.fontSize
+          let lineSpacing = cardStyle.lineSpacing
+          let paragraphText = paragraph
 
-        // 设置左边距变量
-        let paddingLeft = 0
-        // 设置透明度变量
-        let opacity = 1
-        // 设置文本对齐变量
-        let textAlign = 'left'
+          // 设置左边距变量
+          let paddingLeft = 0
+          // 设置透明度变量
+          let opacity = 1
+          // 设置文本对齐变量
+          let textAlign = 'left'
 
-        // 第一步：处理对齐方式（独立处理，不与其他格式冲突）
-        // 先trim再检测，避免空白干扰
-        const trimmedParagraph = paragraph.trim()
-        // :开头 → 左对齐（必须有空格区分中文冒号）
-        const leftAlignPattern = /^\s*:\s+(.+)/
-        // :开头:结尾 → 居中对齐
-        const centerAlignPattern = /^\s*:\s+(.+)\s+:$/
-        // 文字:结尾 → 右对齐（必须有空格区分中文冒号）
-        const rightAlignPattern = /^\s*(.+?)\s+:\s*$/
+          // 第一步：处理对齐方式（独立处理，不与其他格式冲突）
+          // 先trim再检测，避免空白干扰
+          const trimmedParagraph = paragraph.trim()
+          // :开头 → 左对齐（必须有空格区分中文冒号）
+          const leftAlignPattern = /^\s*:\s+(.+)/
+          // :开头:结尾 → 居中对齐
+          const centerAlignPattern = /^\s*:\s+(.+)\s+:$/
+          // 文字:结尾 → 右对齐（必须有空格区分中文冒号）
+          const rightAlignPattern = /^\s*(.+?)\s+:\s*$/
 
-        if (centerAlignPattern.test(trimmedParagraph)) {
-          // :文字 : 居中对齐（冒号前后都要有空格）
-          textAlign = 'center'
-          paragraphText = trimmedParagraph.replace(centerAlignPattern, '$1').trim()
-        } else if (leftAlignPattern.test(trimmedParagraph)) {
-          // : 文字 左对齐（注意：需要先匹配居中，因为居中也以:开头）
-          textAlign = 'left'
-          paragraphText = trimmedParagraph.replace(leftAlignPattern, '$1').trim()
-        } else if (rightAlignPattern.test(trimmedParagraph)) {
-          // 文字 : 右对齐（冒号前后都要有空格）
-          textAlign = 'right'
-          paragraphText = trimmedParagraph.replace(rightAlignPattern, '$1').trim()
-        }
+          if (centerAlignPattern.test(trimmedParagraph)) {
+            // :文字 : 居中对齐（冒号前后都要有空格）
+            textAlign = 'center'
+            paragraphText = trimmedParagraph.replace(centerAlignPattern, '$1').trim()
+          } else if (leftAlignPattern.test(trimmedParagraph)) {
+            // : 文字 左对齐（注意：需要先匹配居中，因为居中也以:开头）
+            textAlign = 'left'
+            paragraphText = trimmedParagraph.replace(leftAlignPattern, '$1').trim()
+          } else if (rightAlignPattern.test(trimmedParagraph)) {
+            // 文字 : 右对齐（冒号前后都要有空格）
+            textAlign = 'right'
+            paragraphText = trimmedParagraph.replace(rightAlignPattern, '$1').trim()
+          }
 
-        // 第二步：处理引用（可以与其他格式组合）
-        const quotePattern = /^\s*>\s*/
-        if (quotePattern.test(paragraphText)) {
-          // 字体0.9倍，透明度0.85，间距0.5倍
-          fontSize = cardStyle.fontSize * 0.9
-          opacity = 0.8
-          lineSpacing = cardStyle.lineSpacing * 0.5
-          // 移除>标记
-          paragraphText = paragraphText.replace(quotePattern, '')
-        }
+          // 第二步：处理引用（可以与其他格式组合）
+          const quotePattern = /^\s*>\s*/
+          if (quotePattern.test(paragraphText)) {
+            // 字体0.9倍，透明度0.85，间距0.5倍
+            fontSize = cardStyle.fontSize * 0.9
+            opacity = 0.8
+            lineSpacing = cardStyle.lineSpacing * 0.5
+            // 移除>标记
+            paragraphText = paragraphText.replace(quotePattern, '')
+          }
 
-        // 第三步：处理标题格式
-        const h1Pattern = /^\s*#\s+(.+)/
-        const h2Pattern = /^\s*##\s+(.+)/
-        const h3Pattern = /^\s*###\s+(.+)/
+          // 第三步：处理标题格式
+          const h1Pattern = /^\s*#\s+(.+)/
+          const h2Pattern = /^\s*##\s+(.+)/
+          const h3Pattern = /^\s*###\s+(.+)/
 
-        if (h1Pattern.test(paragraphText)) {
-          // 一级标题：字体1.6倍，间距1.5倍
-          fontSize = cardStyle.fontSize * 1.6
-          lineSpacing = cardStyle.lineSpacing * 1.5
-          // 移除#标记
-          paragraphText = paragraphText.replace(h1Pattern, '$1')
-        } else if (h2Pattern.test(paragraphText)) {
-          // 二级标题：字体1.4倍，间距1.2倍
-          fontSize = cardStyle.fontSize * 1.4
-          lineSpacing = cardStyle.lineSpacing * 1.2
-          // 移除##标记
-          paragraphText = paragraphText.replace(h2Pattern, '$1')
-        } else if (h3Pattern.test(paragraphText)) {
-          // 三级标题：字体1.2倍
-          fontSize = cardStyle.fontSize * 1.2
-          // 移除###标记
-          paragraphText = paragraphText.replace(h3Pattern, '$1')
-        }
+          if (h1Pattern.test(paragraphText)) {
+            // 一级标题：字体1.6倍，间距1.5倍
+            fontSize = cardStyle.fontSize * 1.6
+            lineSpacing = cardStyle.lineSpacing * 1.5
+            // 移除#标记
+            paragraphText = paragraphText.replace(h1Pattern, '$1')
+          } else if (h2Pattern.test(paragraphText)) {
+            // 二级标题：字体1.4倍，间距1.2倍
+            fontSize = cardStyle.fontSize * 1.4
+            lineSpacing = cardStyle.lineSpacing * 1.2
+            // 移除##标记
+            paragraphText = paragraphText.replace(h2Pattern, '$1')
+          } else if (h3Pattern.test(paragraphText)) {
+            // 三级标题：字体1.2倍
+            fontSize = cardStyle.fontSize * 1.2
+            // 移除###标记
+            paragraphText = paragraphText.replace(h3Pattern, '$1')
+          }
 
-        // 第四步：处理数字标题
-        const chineseNumberPattern = /^\s*[一二三四五六七八九十]、/g
-        const arabicNumberPattern = /^\s*\d+、/g
+          // 第四步：处理数字标题
+          const chineseNumberPattern = /^\s*[一二三四五六七八九十]、/g
+          const arabicNumberPattern = /^\s*\d+、/g
 
-        if (chineseNumberPattern.test(paragraphText)) {
-          // 大写汉字标题：字体1.4倍
-          fontSize = cardStyle.fontSize * 1.4
-        } else if (arabicNumberPattern.test(paragraphText)) {
-          // 阿拉伯数字标题：字体1.2倍
-          fontSize = cardStyle.fontSize * 1.2
-        }
+          if (chineseNumberPattern.test(paragraphText)) {
+            // 大写汉字标题：字体1.4倍
+            fontSize = cardStyle.fontSize * 1.4
+          } else if (arabicNumberPattern.test(paragraphText)) {
+            // 阿拉伯数字标题：字体1.2倍
+            fontSize = cardStyle.fontSize * 1.2
+          }
 
-        // 第五步：处理列表项
-        const dashPattern = /^\s*-\s/gi
-        // 处理水平分隔线 --- 变成空行
-        const horizontalRulePattern = /^\s*-{3,}\s*$/
+          // 第五步：处理列表项
+          const dashPattern = /^\s*-\s/gi
+          // 处理水平分隔线 --- 变成空行
+          const horizontalRulePattern = /^\s*-{3,}\s*$/
 
-        if (horizontalRulePattern.test(paragraphText)) {
-          // --- 变成空行
-          paragraphText = ''
-        } else if (dashPattern.test(paragraphText)) {
-          // 以"- "开头的段落：设置1em左边距
-          paddingLeft = 1
-          // 保留原文本，不需要移除"- "
-        }
-        
-        // 处理空行：空行显示为透明占位符
-        if (paragraphText === '') {
+          if (horizontalRulePattern.test(paragraphText)) {
+            // --- 变成空行
+            paragraphText = ''
+          } else if (dashPattern.test(paragraphText)) {
+            // 以"- "开头的段落：设置1em左边距
+            paddingLeft = 1
+            // 保留原文本，不需要移除"- "
+          }
+
+          // 处理空行：空行显示为透明占位符
+          if (paragraphText === '') {
+            return (
+              <div key={i} style={{
+                height: `${lineSpacing}px`,
+                marginBottom: (i === paragraphs.length - 1) ? 0 : lineSpacing
+              }} />
+            )
+          }
+
+          // 使用 Markdown 渲染
+          const baseStyle = { fontSize, lineSpacing }
+          const markdownContent = renderMarkdown(paragraphText.trim(), baseStyle)
+
           return (
-            <div key={i} style={{ 
-              height: `${lineSpacing}px`,
-              marginBottom: (i === paragraphs.length - 1) ? 0 : lineSpacing
-            }} />
+            <div key={i} style={{
+              marginBottom: (i === paragraphs.length - 1) ? 0 : lineSpacing,
+              fontSize: `${fontSize}px`,
+              paddingLeft: paddingLeft > 0 ? `${paddingLeft}em` : undefined,
+              letterSpacing: '0.1em',
+              lineHeight: `${fontSize * 1.4 + lineSpacing}px`,
+              width: '100%',
+              opacity: opacity,
+              textAlign: textAlign
+            }}>
+              {markdownContent}
+            </div>
           )
-        }
-        
-        // 使用 Markdown 渲染
-        const baseStyle = { fontSize, lineSpacing }
-        const markdownContent = renderMarkdown(paragraphText.trim(), baseStyle)
-        
-        return (
-          <div key={i} style={{
-            marginBottom: (i === paragraphs.length - 1) ? 0 : lineSpacing,
-            fontSize: `${fontSize}px`,
-            paddingLeft: paddingLeft > 0 ? `${paddingLeft}em` : undefined,
-            letterSpacing: '0.1em',
-            lineHeight: `${fontSize * 1.4 + lineSpacing}px`,
-            width: '100%',
-            opacity: opacity,
-            textAlign: textAlign
-          }}>
-            {markdownContent}
-          </div>
-        )
-      })}
+        })}
+      </div>
+      {/* Copyright 信息 */}
+      {cardStyle.copyrightText && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: cardStyle.copyrightBottom,
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            fontSize: cardStyle.copyrightFontSize,
+            color: cardStyle.textColor,
+            fontFamily: cardStyle.fontFamily,
+            opacity: 0.7,
+            pointerEvents: 'none'
+          }}
+        >
+          {cardStyle.copyrightText}
+        </div>
+      )}
     </div>
   )
 }

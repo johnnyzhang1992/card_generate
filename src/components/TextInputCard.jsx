@@ -10,14 +10,12 @@ const TextInputCard = ({
   onTextChange, 
   onSplitTextToCards, 
   onExportCards, 
-  onToggleSettings, 
-  cards, 
-  showSettings 
+  cards
 }) => {
   const [showHelp, setShowHelp] = useState(false)
   
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -43,7 +41,7 @@ const TextInputCard = ({
             value={text}
             onChange={onTextChange}
             placeholder="请输入您的文案内容..."
-            className="min-h-[200px]"
+            className="min-h-[300px]"
           />
         </div>
 
@@ -51,12 +49,6 @@ const TextInputCard = ({
           <Button onClick={onSplitTextToCards} className="flex-1">
             <Play className="w-4 h-4 mr-2" />
             生成卡片
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={onToggleSettings}
-          >
-            <Settings className="w-4 h-4" />
           </Button>
         </div>
 

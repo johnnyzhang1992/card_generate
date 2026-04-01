@@ -15,13 +15,16 @@ function App() {
     height: 800,
     padding: 30,
     backgroundColor: 'rgb(157,41,51)',
-    backgroundImage: '',
+    backgroundImage: '/images/card_bg.png',
     fontSize: 18,
     fontFamily: 'HuiwenMingchao',
     textColor: '#ffffff',
-    lineSpacing: 10
+    lineSpacing: 10,
+    // Copyright 设置
+    copyrightText: '诗词赏析 | @学古诗',
+    copyrightBottom: 20,
+    copyrightFontSize: 18
   })
-  const [showSettings, setShowSettings] = useState(false)
   const [scale, setScale] = useState(0.65)
 
   // 智能分割文本到多张卡片
@@ -40,11 +43,6 @@ function App() {
     setText(e.target.value)
   }
 
-  // 切换设置面板显示
-  const handleToggleSettings = () => {
-    setShowSettings(!showSettings)
-  }
-
   // 处理卡片样式变化
   const handleCardStyleChange = (newStyle) => {
     setCardStyle(newStyle)
@@ -56,44 +54,43 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-slate-800 mb-2">文案卡片生成器</h1>
           <p className="text-slate-600">输入文案，自动生成精美的卡片</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 左侧：输入和设置 */}
-          <div className="lg:col-span-1 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* 左侧：文案输入 */}
+          <div className="lg:col-span-3  sticky top-0 h-[calc(100vh-10rem)]">
             <TextInputCard
               text={text}
               onTextChange={handleTextChange}
               onSplitTextToCards={handleSplitTextToCards}
               onExportCards={handleExportCards}
-              onToggleSettings={handleToggleSettings}
               cards={cards}
-              showSettings={showSettings}
             />
-
-            {showSettings && (
-              <CardSettings
-                cardStyle={cardStyle}
-                onCardStyleChange={handleCardStyleChange}
-              />
-            )}
           </div>
 
-          {/* 右侧：卡片预览 */}
-          <div className="lg:col-span-2 sticky top-0 h-[calc(100vh-12rem)] overflow-hidden">
+          {/* 中间：卡片预览 */}
+          <div className="lg:col-span-6 sticky top-0 h-[calc(100vh-10rem)] overflow-hidden">
             <div className="h-full overflow-y-auto p-2">
-              <CardPreview 
-                cards={cards} 
-                cardStyle={cardStyle} 
+              <CardPreview
+                cards={cards}
+                cardStyle={cardStyle}
                 scale={scale}
                 onScaleChange={handleScaleChange}
               />
             </div>
+          </div>
+
+          {/* 右侧：卡片设置 */}
+          <div className="lg:col-span-3 sticky top-0 h-[calc(100vh-10rem)] overflow-y-auto">
+            <CardSettings
+              cardStyle={cardStyle}
+              onCardStyleChange={handleCardStyleChange}
+            />
           </div>
         </div>
       </div>
