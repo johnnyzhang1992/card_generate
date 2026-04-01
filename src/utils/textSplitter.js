@@ -104,21 +104,23 @@ export const splitTextToCards = (text, cardStyle) => {
     // 使用Pretext计算这个段落需要的高度和行信息
     const paragraphMetrics = calculateParagraphWithPretext(paragraph)
 
-    // 检查当前卡片是否能容纳这个段落
     // 计算当前卡片的剩余空间
     const remainingSpace = availableHeight - currentCardHeight
-    // 如果段落高度超过可用高度，需要跨卡片分割
-    // 如果当前卡片有剩余空间且段落可以部分放入，也需要分割
-    const needsSplit = paragraphMetrics.height > availableHeight || 
-                       (remainingSpace > 0 && remainingSpace < paragraphMetrics.height)
+    
+    // 调试日志
+    console.log('[Pretext] Paragraph:', paragraph.substring(0, 50), 'Height:', paragraphMetrics.height, 'Remaining:', remainingSpace, 'Available:', availableHeight)
 
+    // 情况1：剩余空间足够放入整个段落
     if (remainingSpace >= paragraphMetrics.height) {
-      // 剩余空间足够放入整个段落
       currentCardContent.push(paragraph)
       currentCardHeight += paragraphMetrics.height
-    } else if (paragraphMetrics.height > availableHeight) {
-      // 段落高度超过可用高度，需要跨卡片分割
-      // 不保存当前卡片内容，直接尝试分割段落
+      console.log('[Pretext] Added to current card. New height:', currentCardHeight)
+      continue
+    }
+
+    // 情况2：段落高度超过单张卡片可用高度（需要跨卡片分割）
+    if (paragraphMetrics.height > availableHeight) {
+      console.log('[Pretext] Paragraph exceeds card height, splitting across cards')
       const { fontSize, lineSpacing, lines } = paragraphMetrics
       const lineHeight = calculateParagraphHeight(paragraph, fontSize, lineSpacing)
 
@@ -147,20 +149,22 @@ export const splitTextToCards = (text, cardStyle) => {
           const partWithMarkers = partLines.map(line => markerPrefix + line).join('\n')
           currentCardContent.push(partWithMarkers)
           currentCardHeight += partHeight
+          console.log('[Pretext] Added', linesToAdd.length, 'lines to current card from overflow paragraph')
         }
 
         remainingLines = remainingLines.slice(maxLinesInCurrentCard)
       }
 
+      // 保存当前卡片（如果有内容）
+      if (currentCardContent.length > 0) {
+        cards.push([...currentCardContent])
+        console.log('[Pretext] Saved current card with', currentCardContent.length, 'paragraphs')
+        currentCardContent = []
+        currentCardHeight = 0
+      }
+
       // 如果还有剩余行，创建新卡片继续放入
       while (remainingLines.length > 0) {
-        // 保存当前卡片（如果有内容）
-        if (currentCardContent.length > 0) {
-          cards.push([...currentCardContent])
-          currentCardContent = []
-          currentCardHeight = 0
-        }
-
         const remainingHeightInNewCard = availableHeight
         const maxLines = Math.floor(remainingHeightInNewCard / lineHeight)
 
@@ -175,21 +179,112 @@ export const splitTextToCards = (text, cardStyle) => {
           const partWithMarkers = partLines.map(line => markerPrefix + line).join('\n')
           currentCardContent.push(partWithMarkers)
           currentCardHeight += partHeight
+          console.log('[Pretext] Created new card with', linesToAdd.length, 'lines from overflow paragraph')
         }
 
         remainingLines = remainingLines.slice(maxLines)
+        
+        // 如果还有剩余行，保存当前卡片并继续
+        if (remainingLines.length > 0) {
+          cards.push([...currentCardContent])
+          currentCardContent = []
+          currentCardHeight = 0
+        }
       }
-    } else {
-      // 段落可以放入新卡片，直接添加整个段落
-      currentCardContent.push(paragraph)
-      currentCardHeight = paragraphMetrics.height
+      continue
     }
+
+    // 情况3：剩余空间不足但段落可以放入一张卡片
+    // 需要分割段落：部分放入当前卡片，剩余部分放入新卡片
+    if (remainingSpace > 0 && remainingSpace < paragraphMetrics.height) {
+      console.log('[Pretext] Splitting paragraph between cards (partial fit)')
+      const { fontSize, lineSpacing, lines } = paragraphMetrics
+      const lineHeight = calculateParagraphHeight(paragraph, fontSize, lineSpacing)
+
+      // 获取原始段落的标记类型
+      const getMarkerPrefix = () => {
+        if (/^\s*#\s+/.test(paragraph)) return '# '
+        if (/^\s*##\s+/.test(paragraph)) return '## '
+        if (/^\s*###\s+/.test(paragraph)) return '### '
+        if (/^\s*>\s*/.test(paragraph)) return '> '
+        return ''
+      }
+      const markerPrefix = getMarkerPrefix()
+
+      // 计算当前卡片可以容纳的行数
+      const maxLinesInCurrentCard = Math.floor(remainingSpace / lineHeight)
+      
+      if (maxLinesInCurrentCard > 0) {
+        const linesToAdd = lines.slice(0, maxLinesInCurrentCard)
+        const partText = linesToAdd.map(l => l.text).join('\n')
+        const partHeight = linesToAdd.length * lineHeight
+
+        if (partText.trim().length > 0) {
+          const partLines = partText.split('\n')
+          const partWithMarkers = partLines.map(line => markerPrefix + line).join('\n')
+          currentCardContent.push(partWithMarkers)
+          currentCardHeight += partHeight
+          console.log('[Pretext] Added', linesToAdd.length, 'lines to current card (partial)')
+        }
+
+        // 保存当前卡片
+        cards.push([...currentCardContent])
+        console.log('[Pretext] Saved current card after partial split')
+        currentCardContent = []
+        currentCardHeight = 0
+
+        // 剩余的行放入新卡片
+        const remainingLines = lines.slice(maxLinesInCurrentCard)
+        if (remainingLines.length > 0) {
+          const remainingText = remainingLines.map(l => l.text).join('\n')
+          const remainingHeight = remainingLines.length * lineHeight
+          
+          if (remainingText.trim().length > 0) {
+            const remainingLinesArray = remainingText.split('\n')
+            const remainingWithMarkers = remainingLinesArray.map(line => markerPrefix + line).join('\n')
+            currentCardContent.push(remainingWithMarkers)
+            currentCardHeight = remainingHeight
+            console.log('[Pretext] Added remaining', remainingLines.length, 'lines to new card')
+          }
+        }
+      } else {
+        // 剩余空间不足一行，直接保存当前卡片并开始新卡片
+        if (currentCardContent.length > 0) {
+          cards.push([...currentCardContent])
+          console.log('[Pretext] Saved current card (no space for even one line)')
+          currentCardContent = []
+          currentCardHeight = 0
+        }
+        
+        // 将整个段落放入新卡片
+        currentCardContent.push(paragraph)
+        currentCardHeight = paragraphMetrics.height
+        console.log('[Pretext] Started new card with entire paragraph')
+      }
+      continue
+    }
+
+    // 情况4：剩余空间为0（当前卡片已满）或负值
+    // 保存当前卡片并开始新卡片
+    if (currentCardContent.length > 0) {
+      cards.push([...currentCardContent])
+      console.log('[Pretext] Saved current card (full or overfull)')
+      currentCardContent = []
+      currentCardHeight = 0
+    }
+    
+    // 将段落放入新卡片
+    currentCardContent.push(paragraph)
+    currentCardHeight = paragraphMetrics.height
+    console.log('[Pretext] Started new card with paragraph')
   }
 
   // 处理最后一张卡片
   if (currentCardContent.length > 0) {
     cards.push([...currentCardContent])
+    console.log('[Pretext] Saved final card with', currentCardContent.length, 'paragraphs')
   }
 
+  console.log('[Pretext] Total cards generated:', cards.length)
   return cards
 }
