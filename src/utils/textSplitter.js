@@ -111,8 +111,10 @@ export const splitTextToCards = (text, cardStyle) => {
 
     // 检查当前卡片是否能容纳这个段落
     // 需要检查：当前高度 + 段落高度 <= 可用高度
-    const remainingSpace = availableHeight - currentCardHeight
-    if (currentCardHeight + paragraphMetrics.height <= availableHeight) {
+    // 如果段落高度超过可用高度的85%，也视为需要跨卡片处理
+    const shouldSplitParagraph = paragraphMetrics.height > availableHeight * 0.85
+    
+    if (currentCardHeight + paragraphMetrics.height <= availableHeight && !shouldSplitParagraph) {
       // 可以放入当前卡片，直接添加整个段落
       currentCardContent.push(paragraph)
       currentCardHeight += paragraphMetrics.height
