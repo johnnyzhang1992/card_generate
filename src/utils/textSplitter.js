@@ -110,6 +110,8 @@ export const splitTextToCards = (text, cardStyle) => {
     console.log('[Split] Height:', paragraphMetrics.height, 'Available:', availableHeight, 'CurrentHeight:', currentCardHeight, 'WillSplit:', paragraphMetrics.height > availableHeight)
 
     // 检查当前卡片是否能容纳这个段落
+    // 需要检查：当前高度 + 段落高度 <= 可用高度
+    const remainingSpace = availableHeight - currentCardHeight
     if (currentCardHeight + paragraphMetrics.height <= availableHeight) {
       // 可以放入当前卡片，直接添加整个段落
       currentCardContent.push(paragraph)
@@ -201,6 +203,8 @@ export const splitTextToCards = (text, cardStyle) => {
   if (currentCardContent.length > 0) {
     cards.push([...currentCardContent])
   }
+
+  console.log('[Result] Total cards:', cards.length, 'Cards:', cards.map(c => c.length))
 
   return cards
 }
