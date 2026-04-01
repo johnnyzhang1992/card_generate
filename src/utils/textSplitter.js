@@ -91,6 +91,9 @@ export const splitTextToCards = (text, cardStyle) => {
     const prepared = prepareWithSegments(pureText, font)
     const { height, lines } = layoutWithLines(prepared, availableWidth, lineHeight)
 
+    // 调试日志
+    console.log('[Pretext] Text:', pureText.substring(0, 20), 'Height:', height, 'Lines:', lines.length, 'Available:', availableHeight)
+
     return { height, lines, fontSize, lineSpacing }
   }
 
@@ -103,6 +106,8 @@ export const splitTextToCards = (text, cardStyle) => {
   for (const paragraph of paragraphs) {
     // 使用Pretext计算这个段落需要的高度和行信息
     const paragraphMetrics = calculateParagraphWithPretext(paragraph)
+
+    console.log('[Split] Height:', paragraphMetrics.height, 'Available:', availableHeight, 'CurrentHeight:', currentCardHeight, 'WillSplit:', paragraphMetrics.height > availableHeight)
 
     // 检查当前卡片是否能容纳这个段落
     if (currentCardHeight + paragraphMetrics.height <= availableHeight) {
