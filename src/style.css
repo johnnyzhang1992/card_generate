@@ -1,0 +1,35 @@
+@font-face {
+	font-family: 'ChillKai';
+	src: url('/fonts/ChillKai_Big5.woff2');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'AlimamaDaoLiTi';
+	src: url('/fonts/AlimamaDaoLiTi.woff2');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'HanyiZhongliShujian';
+	src: url('/fonts/HanyiZhongliShujian.ttf');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'HuiwenMingchao';
+	src: url('/fonts/HuiwenMingchao.ttf');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'KingHwa';
+	src: url('/fonts/KingHwa.ttf');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}

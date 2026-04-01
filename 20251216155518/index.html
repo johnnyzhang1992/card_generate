@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单页布局</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            color: #333;
+            background-color: #f4f4f4;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            height: 60px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-item {
+            position: relative;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            padding: 10px 0;
+            min-width: 180px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .dropdown-content::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+        }
+
+        .nav-item:hover .dropdown-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-16px);
+            position: relative;
+        }
+
+        .nav-item:hover .dropdown-item:nth-child(1) {
+            animation: slideIn 0.3s ease 0.1s forwards;
+        }
+
+        .nav-item:hover .dropdown-item:nth-child(2) {
+            animation: slideIn 0.3s ease 0.2s forwards;
+        }
+
+        .nav-item:hover .dropdown-item:nth-child(3) {
+            animation: slideIn 0.3s ease 0.3s forwards;
+        }
+
+        .nav-item:hover .dropdown-item:nth-child(4) {
+            animation: slideIn 0.3s ease 0.4s forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(90deg, #2081FF, #D900FF);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            margin-top: 60px;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 220px;
+            background-color: #fff;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 999;
+        }
+
+        .sidebar-section {
+            padding: 10px;
+            border-bottom: 1px solid #d9d9d9;
+        }
+
+        .sidebar-section:nth-child(1) {
+            flex: 0 0 auto;
+            background-color: #f4f4f4;
+        }
+
+        .sidebar-section:nth-child(2) {
+            flex: 1;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+
+        .sidebar-section:nth-child(3) {
+            flex: 0 0 auto;
+            background-color: #f4f4f4;
+        }
+
+        /* 隐藏滚动条 */
+        .sidebar-section:nth-child(2)::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sidebar-section:nth-child(2) {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .tall-content {
+            height: 800px;
+            background: linear-gradient(180deg, #f4f4f4, #d9d9d9);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* 内容区域 */
+        .content-area {
+            flex: 1;
+            margin-left: 220px;
+            padding: 40px;
+            background-color: #f4f4f4;
+        }
+
+        .content-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .long-content {
+            height: 2000px;
+            background: linear-gradient(180deg, #fff, #f4f4f4);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <ul class="nav-menu">
+            <li class="nav-item">
+                首页
+            </li>
+            <li class="nav-item">
+                产品
+                <div class="dropdown-content">
+                    <div class="dropdown-item">菜单项一</div>
+                    <div class="dropdown-item">菜单项二</div>
+                    <div class="dropdown-item">菜单项三</div>
+                    <div class="dropdown-item">菜单项四</div>
+                </div>
+            </li>
+            <li class="nav-item">
+                服务
+            </li>
+            <li class="nav-item">
+                关于我们
+            </li>
+        </ul>
+    </nav>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>顶部区域</h3>
+                <p>这里是一些顶部内容</p>
+            </div>
+            <div class="sidebar-section">
+                <h3>中间区域（可滚动）</h3>
+                <div class="tall-content">
+                    这是一个较高的内容区域，用于演示滚动效果
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <h3>底部区域</h3>
+                <p>这里是一些底部内容</p>
+            </div>
+        </aside>
+
+        <!-- 内容区域 -->
+        <main class="content-area">
+            <div class="content-card">
+                <h1>主要内容区域</h1>
+                <p>这里是页面的主要内容区域，可以滚动查看更多内容。</p>
+                <div class="long-content">
+                    这是一个很长的内容区域，用于演示body元素的滚动效果
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
