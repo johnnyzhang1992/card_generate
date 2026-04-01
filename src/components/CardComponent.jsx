@@ -195,6 +195,8 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
         let textAlign = 'left'
 
         // 第一步：处理对齐方式（独立处理，不与其他格式冲突）
+        // 先trim再检测，避免空白干扰
+        const trimmedParagraph = paragraph.trim()
         // :开头 → 左对齐（必须有空格区分中文冒号）
         const leftAlignPattern = /^\s*:\s+(.+)/
         // :开头:结尾 → 居中对齐
@@ -202,18 +204,18 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
         // 文字:结尾 → 右对齐（必须有空格区分中文冒号）
         const rightAlignPattern = /^\s*(.+?)\s+:\s*$/
 
-        if (centerAlignPattern.test(paragraph)) {
+        if (centerAlignPattern.test(trimmedParagraph)) {
           // :文字 : 居中对齐（冒号前后都要有空格）
           textAlign = 'center'
-          paragraphText = paragraph.replace(centerAlignPattern, '$1').trim()
-        } else if (leftAlignPattern.test(paragraph)) {
+          paragraphText = trimmedParagraph.replace(centerAlignPattern, '$1').trim()
+        } else if (leftAlignPattern.test(trimmedParagraph)) {
           // : 文字 左对齐（注意：需要先匹配居中，因为居中也以:开头）
           textAlign = 'left'
-          paragraphText = paragraph.replace(leftAlignPattern, '$1').trim()
-        } else if (rightAlignPattern.test(paragraph)) {
+          paragraphText = trimmedParagraph.replace(leftAlignPattern, '$1').trim()
+        } else if (rightAlignPattern.test(trimmedParagraph)) {
           // 文字 : 右对齐（冒号前后都要有空格）
           textAlign = 'right'
-          paragraphText = paragraph.replace(rightAlignPattern, '$1').trim()
+          paragraphText = trimmedParagraph.replace(rightAlignPattern, '$1').trim()
         }
 
         // 第二步：处理引用（可以与其他格式组合）
