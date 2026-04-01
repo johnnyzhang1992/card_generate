@@ -110,92 +110,83 @@ export const splitTextToCards = (text, cardStyle) => {
     console.log('[Split] Height:', paragraphMetrics.height, 'Available:', availableHeight, 'CurrentHeight:', currentCardHeight, 'WillSplit:', paragraphMetrics.height > availableHeight)
 
     // 检查当前卡片是否能容纳这个段落
-    // 需要检查：当前高度 + 段落高度 <= 可用高度
-    // 如果段落高度超过可用高度的85%，也视为需要跨卡片处理
-    const shouldSplitParagraph = paragraphMetrics.height > availableHeight * 0.85
+    // 计算当前卡片的剩余空间
+    const remainingSpace = availableHeight - currentCardHeight
+    // 如果段落高度超过可用高度，需要跨卡片分割
+    // 如果当前卡片有剩余空间且段落可以部分放入，也需要分割
+    const needsSplit = paragraphMetrics.height > availableHeight || 
+                       (remainingSpace > 0 && remainingSpace < paragraphMetrics.height)
     
-    console.log('[Split] shouldSplitParagraph:', shouldSplitParagraph, 'calc:', currentCardHeight + paragraphMetrics.height, '<=', availableHeight)
+    console.log('[Split] remainingSpace:', remainingSpace, 'needsSplit:', needsSplit)
 
-    if (currentCardHeight + paragraphMetrics.height <= availableHeight && !shouldSplitParagraph) {
-      // 可以放入当前卡片，直接添加整个段落
+    if (remainingSpace >= paragraphMetrics.height) {
+      // 剩余空间足够放入整个段落
       currentCardContent.push(paragraph)
       currentCardHeight += paragraphMetrics.height
-    } else {
-      // 当前卡片放不下这个段落，需要分页
+    } else if (paragraphMetrics.height > availableHeight) {
+      // 段落高度超过可用高度，需要跨卡片分割
+      // 不保存当前卡片内容，直接尝试分割段落
+      const { fontSize, lineSpacing, lines } = paragraphMetrics
+      const lineHeight = calculateParagraphHeight(paragraph, fontSize, lineSpacing)
 
-      // 先保存当前卡片的内容
-      if (currentCardContent.length > 0) {
-        cards.push([...currentCardContent])
-        currentCardContent = []
-        currentCardHeight = 0
+      // 获取原始段落的标记类型
+      const getMarkerPrefix = () => {
+        if (/^\s*#\s+/.test(paragraph)) return '# '
+        if (/^\s*##\s+/.test(paragraph)) return '## '
+        if (/^\s*###\s+/.test(paragraph)) return '### '
+        if (/^\s*>\s*/.test(paragraph)) return '> '
+        return ''
+      }
+      const markerPrefix = getMarkerPrefix()
+
+      let remainingLines = [...lines]
+      
+      // 先尝试放入当前卡片的剩余空间
+      const maxLinesInCurrentCard = Math.floor(remainingSpace / lineHeight)
+      
+      if (maxLinesInCurrentCard > 0) {
+        const linesToAdd = remainingLines.slice(0, maxLinesInCurrentCard)
+        const partText = linesToAdd.map(l => l.text).join('\n')
+        const partHeight = linesToAdd.length * lineHeight
+
+        if (partText.trim().length > 0) {
+          const partLines = partText.split('\n')
+          const partWithMarkers = partLines.map(line => markerPrefix + line).join('\n')
+          currentCardContent.push(partWithMarkers)
+          currentCardHeight += partHeight
+        }
+
+        remainingLines = remainingLines.slice(maxLinesInCurrentCard)
       }
 
-      // 检查段落是否需要跨多个卡片
-      if (paragraphMetrics.height > availableHeight) {
-        // 段落需要跨多个卡片，需要智能拆分
-        const { fontSize, lineSpacing, lines } = paragraphMetrics
-        const lineHeight = calculateParagraphHeight(paragraph, fontSize, lineSpacing)
-
-        // 获取原始段落的标记类型
-        const getMarkerPrefix = () => {
-          if (/^\s*#\s+/.test(paragraph)) return '# '
-          if (/^\s*##\s+/.test(paragraph)) return '## '
-          if (/^\s*###\s+/.test(paragraph)) return '### '
-          if (/^\s*>\s*/.test(paragraph)) return '> '
-          return ''
+      // 如果还有剩余行，创建新卡片继续放入
+      while (remainingLines.length > 0) {
+        // 保存当前卡片（如果有内容）
+        if (currentCardContent.length > 0) {
+          cards.push([...currentCardContent])
+          currentCardContent = []
+          currentCardHeight = 0
         }
-        const markerPrefix = getMarkerPrefix()
 
-        let remainingLines = [...lines]
-        
-        while (remainingLines.length > 0) {
-          const remainingHeightInCard = availableHeight - currentCardHeight
+        const remainingHeightInNewCard = availableHeight
+        const maxLines = Math.floor(remainingHeightInNewCard / lineHeight)
 
-          if (remainingHeightInCard <= 0) {
-            // 当前卡片已满，创建新卡片
-            if (currentCardContent.length > 0) {
-              cards.push([...currentCardContent])
-              currentCardContent = []
-              currentCardHeight = 0
-            }
-            continue
-          }
+        if (maxLines <= 0) break
 
-          // 计算能容纳多少行
-          const maxLines = Math.floor(remainingHeightInCard / lineHeight)
+        const linesToAdd = remainingLines.slice(0, maxLines)
+        const partText = linesToAdd.map(l => l.text).join('\n')
+        const partHeight = linesToAdd.length * lineHeight
 
-          if (maxLines <= 0) {
-            // 无法容纳一行，创建新卡片
-            if (currentCardContent.length > 0) {
-              cards.push([...currentCardContent])
-              currentCardContent = []
-              currentCardHeight = 0
-            }
-            continue
-          }
-
-          const linesToAdd = remainingLines.slice(0, maxLines)
-          const partText = linesToAdd.map(l => l.text).join('\n')
-          const partHeight = linesToAdd.length * lineHeight
-
-          if (partText.trim().length > 0) {
-            // 还原markdown标记，并保持换行
-            const partLines = partText.split('\n')
-            const partWithMarkers = partLines.map(line => markerPrefix + line).join('\n')
-            currentCardContent.push(partWithMarkers)
-            currentCardHeight += partHeight
-          }
-
-          remainingLines = remainingLines.slice(maxLines)
-
-          // 如果还有剩余行但当前卡片已满，需要创建新卡片
-          if (remainingLines.length > 0 && currentCardHeight >= availableHeight) {
-            cards.push([...currentCardContent])
-            currentCardContent = []
-            currentCardHeight = 0
-          }
+        if (partText.trim().length > 0) {
+          const partLines = partText.split('\n')
+          const partWithMarkers = partLines.map(line => markerPrefix + line).join('\n')
+          currentCardContent.push(partWithMarkers)
+          currentCardHeight += partHeight
         }
-      } else {
+
+        remainingLines = remainingLines.slice(maxLines)
+      }
+    } else {
         // 段落可以放入新卡片，直接添加整个段落
         currentCardContent.push(paragraph)
         currentCardHeight = paragraphMetrics.height
