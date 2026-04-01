@@ -22,7 +22,7 @@ const createExportCard = (cardContent, cardStyle) => {
   card.style.fontFamily = cardStyle.fontFamily
   card.style.fontSize = `${cardStyle.fontSize}px`
   card.style.color = cardStyle.textColor
-  card.style.lineHeight = '1.4em'
+  card.style.lineHeight = `${cardStyle.fontSize * 1.2 + cardStyle.lineSpacing}px`
   card.style.letterSpacing = '0.1em'
   card.style.boxSizing = 'border-box'
   card.style.display = 'flex'
@@ -47,6 +47,7 @@ const createExportCard = (cardContent, cardStyle) => {
   contentWrapper.style.flex = '1'
   contentWrapper.style.width = '100%'
   contentWrapper.style.overflow = 'hidden'
+  contentWrapper.style.paddingBottom = cardStyle.copyrightText ? '40px' : '0'
 
   // 添加文本内容
   cardContent.forEach((paragraph, i) => {

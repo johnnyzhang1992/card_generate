@@ -181,7 +181,7 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
         boxSizing: 'border-box'
       }}
     >
-      <div className="flex-1 w-full overflow-hidden">
+      <div className="flex-1 w-full overflow-hidden" style={{ paddingBottom: cardStyle.copyrightText ? '40px' : 0 }}>
         {paragraphs.map((paragraph, i) => {
           // 检测段落格式并设置字体大小和间距
           let fontSize = cardStyle.fontSize

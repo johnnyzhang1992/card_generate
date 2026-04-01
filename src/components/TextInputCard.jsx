@@ -15,8 +15,8 @@ const TextInputCard = ({
   const [showHelp, setShowHelp] = useState(false)
   
   return (
-    <Card className="h-full">
-      <CardHeader>
+    <Card className="h-full overflow-y-auto">
+      <CardHeader className="py-4">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Settings className="w-5 h-5" />

@@ -2,6 +2,8 @@
 
 一款基于 React + Vite + Tailwind CSS 的卡片生成工具，支持 Markdown 语法、智能文本分割和图片导出。
 
+![项目预览](./public/images/example.png)
+
 ## 功能特性
 
 - **Markdown 支持**：支持粗体、斜体、代码、标题、引用、列表等常用语法
@@ -82,7 +84,7 @@ src/
 
 ## 技术栈
 
-- **框架**：React 18
+- **框架**：React 19
 - **构建工具**：Vite
 - **样式**：Tailwind CSS + shadcn/ui
 - **导出**：html2canvas

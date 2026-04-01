@@ -6,9 +6,12 @@ export const splitTextToCards = (text, cardStyle) => {
 
   const cards = []
 
-  // 计算卡片可用区域（考虑内边距）
+  // 计算卡片可用区域（考虑内边距和 copyright 预留空间）
   const availableWidth = cardStyle.width - cardStyle.padding * 2
-  const availableHeight = cardStyle.height - cardStyle.padding * 2
+  const copyrightReserve = cardStyle.copyrightText ? 40 : 0
+  // 添加安全系数弥补 pretext 与 CSS 渲染的差异
+  const safetyMargin = cardStyle.fontSize * 0.5
+  const availableHeight = cardStyle.height - cardStyle.padding * 2 - copyrightReserve - safetyMargin
 
   // 辅助函数：检测段落格式并返回对应的字体大小和行间距
   const detectParagraphStyle = (paragraph) => {
@@ -51,9 +54,11 @@ export const splitTextToCards = (text, cardStyle) => {
   }
 
   // 辅助函数：计算段落需要的行高
+  // 注意：pretext 计算可能比实际渲染略小，添加额外余量
   const calculateParagraphHeight = (_paragraph, fontSize, lineSpacing) => {
     const lineHeight = fontSize * 1.4 + lineSpacing
-    return lineHeight
+    // 额外增加 15% 的高度作为安全余量
+    return lineHeight * 1.15
   }
 
   // 辅助函数：移除 markdown 标记以获取纯文本用于计算宽度

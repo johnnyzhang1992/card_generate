@@ -11,7 +11,7 @@ import { FontList } from '@/config/config'
 const DEFAULT_STYLE = {
   width: 600,
   height: 800,
-  padding: 30,
+  padding: 40,
   backgroundColor: 'rgb(157,41,51)',
   backgroundImage: '/images/card_bg.png',
   fontSize: 18,
@@ -19,8 +19,8 @@ const DEFAULT_STYLE = {
   textColor: '#ffffff',
   lineSpacing: 10,
   copyrightText: '诗词赏析 | @学古诗',
-  copyrightBottom: 30,
-  copyrightFontSize: 18
+  copyrightBottom: 5,
+  copyrightFontSize: 10
 }
 
 // 摘录卡片样式
