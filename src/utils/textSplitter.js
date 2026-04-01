@@ -195,21 +195,70 @@ export const splitTextToCards = (text, cardStyle) => {
     }
 
     // 情况3：剩余空间不足，段落可以放入新卡片
-    // 不拆分，直接放入新卡片（即使当前卡片有剩余空间）
-    console.log('[Pretext] Paragraph fits in new card, moving entire paragraph')
+    // 如果当前卡片剩余空间足够多（>200px），则拆分段落填充剩余空间
+    // 否则直接移到新卡片
+    const SPACE_THRESHOLD = 200 // 最小剩余空间阈值
     
-    // 保存当前卡片
-    if (currentCardContent.length > 0) {
-      cards.push([...currentCardContent])
-      console.log('[Pretext] Saved current card with', currentCardContent.length, 'paragraphs')
-      currentCardContent = []
-      currentCardHeight = 0
+    if (remainingSpace > SPACE_THRESHOLD) {
+      // 拆分段落：部分填充当前卡片，剩余放入新卡片
+      console.log('[Pretext] Splitting paragraph to fill remaining space:', remainingSpace)
+      const { fontSize, lineSpacing, lines } = paragraphMetrics
+      const lineHeight = calculateParagraphHeight(paragraph, fontSize, lineSpacing)
+
+      const getMarkerPrefix = () => {
+        if (/^\s*#\s+/.test(paragraph)) return '# '
+        if (/^\s*##\s+/.test(paragraph)) return '## '
+        if (/^\s*###\s+/.test(paragraph)) return '### '
+        if (/^\s*>\s*/.test(paragraph)) return '> '
+        return ''
+      }
+      const markerPrefix = getMarkerPrefix()
+
+      const maxLinesInCurrentCard = Math.floor(remainingSpace / lineHeight)
+      
+      if (maxLinesInCurrentCard > 0) {
+        const linesToAdd = lines.slice(0, maxLinesInCurrentCard)
+        const partText = linesToAdd.map(l => l.text).join('\n')
+        const partHeight = linesToAdd.length * lineHeight
+
+        if (partText.trim().length > 0) {
+          const partLines = partText.split('\n')
+          const partWithMarkers = partLines.map(line => markerPrefix + line).join('\n')
+          currentCardContent.push(partWithMarkers)
+          currentCardHeight += partHeight
+          console.log('[Pretext] Added', linesToAdd.length, 'lines to current card')
+        }
+
+        cards.push([...currentCardContent])
+        console.log('[Pretext] Saved current card with', currentCardContent.length, 'paragraphs')
+        currentCardContent = []
+        currentCardHeight = 0
+
+        const remainingLines = lines.slice(maxLinesInCurrentCard)
+        if (remainingLines.length > 0) {
+          const remainingText = remainingLines.map(l => l.text).join('\n')
+          const remainingHeight = remainingLines.length * lineHeight
+          
+          if (remainingText.trim().length > 0) {
+            const remainingLinesArray = remainingText.split('\n')
+            const remainingWithMarkers = remainingLinesArray.map(line => markerPrefix + line).join('\n')
+            currentCardContent.push(remainingWithMarkers)
+            currentCardHeight = remainingHeight
+            console.log('[Pretext] Added remaining', remainingLines.length, 'lines to new card')
+          }
+        }
+      }
+    } else {
+      // 剩余空间不足，直接移到新卡片
+      console.log('[Pretext] Remaining space too small, moving paragraph to new card')
+      if (currentCardContent.length > 0) {
+        cards.push([...currentCardContent])
+        currentCardContent = []
+        currentCardHeight = 0
+      }
+      currentCardContent.push(paragraph)
+      currentCardHeight = paragraphMetrics.height
     }
-    
-    // 将整个段落放入新卡片
-    currentCardContent.push(paragraph)
-    currentCardHeight = paragraphMetrics.height
-    console.log('[Pretext] Started new card with entire paragraph')
   }
 
   // 处理最后一张卡片
