@@ -164,12 +164,13 @@ export const splitTextToCards = (text, cardStyle) => {
           }
 
           const linesToAdd = remainingLines.slice(0, maxLines)
-          const partText = linesToAdd.map(l => l.text).join('')
+          const partText = linesToAdd.map(l => l.text).join('\n')
           const partHeight = linesToAdd.length * lineHeight
 
           if (partText.trim().length > 0) {
-            // 还原markdown标记
-            const partWithMarkers = markerPrefix + partText
+            // 还原markdown标记，并保持换行
+            const partLines = partText.split('\n')
+            const partWithMarkers = partLines.map(line => markerPrefix + line).join('\n')
             currentCardContent.push(partWithMarkers)
             currentCardHeight += partHeight
           }
