@@ -65,18 +65,19 @@ const createExportCard = (cardContent, cardStyle) => {
     // 文字:结尾 → 右对齐（必须有空格区分中文冒号）
     const rightAlignPattern = /^\s*(.+?)\s+:\s*$/
 
-    if (centerAlignPattern.test(paragraph)) {
+    // 使用已trim的文本进行对齐检测
+    if (centerAlignPattern.test(paragraphText)) {
       // :文字 : 居中对齐（冒号前后都要有空格）
       textAlign = 'center'
-      paragraphText = paragraph.replace(centerAlignPattern, '$1').trim()
-    } else if (leftAlignPattern.test(paragraph)) {
+      paragraphText = paragraphText.replace(centerAlignPattern, '$1').trim()
+    } else if (leftAlignPattern.test(paragraphText)) {
       // : 文字 左对齐（注意：需要先匹配居中，因为居中也以:开头）
       textAlign = 'left'
-      paragraphText = paragraph.replace(leftAlignPattern, '$1').trim()
-    } else if (rightAlignPattern.test(paragraph)) {
+      paragraphText = paragraphText.replace(leftAlignPattern, '$1').trim()
+    } else if (rightAlignPattern.test(paragraphText)) {
       // 文字 : 右对齐（冒号前后都要有空格）
       textAlign = 'right'
-      paragraphText = paragraph.replace(rightAlignPattern, '$1').trim()
+      paragraphText = paragraphText.replace(rightAlignPattern, '$1').trim()
     }
 
     // 第二步：处理引用（可以与其他格式组合）
