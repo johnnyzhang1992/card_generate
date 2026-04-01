@@ -216,37 +216,32 @@ export const splitTextToCards = (text, cardStyle) => {
 
       const maxLinesInCurrentCard = Math.floor(remainingSpace / lineHeight)
       
-      if (maxLinesInCurrentCard > 0) {
+      if (maxLinesInCurrentCard > 0 && maxLinesInCurrentCard < lines.length) {
+        // 拆分段落
         const linesToAdd = lines.slice(0, maxLinesInCurrentCard)
-        const partText = linesToAdd.map(l => l.text).join('\n')
+        const remainingLines = lines.slice(maxLinesInCurrentCard)
         const partHeight = linesToAdd.length * lineHeight
+        const remainingHeight = remainingLines.length * lineHeight
 
-        if (partText.trim().length > 0) {
-          const partLines = partText.split('\n')
-          const partWithMarkers = partLines.map(line => markerPrefix + line).join('\n')
-          currentCardContent.push(partWithMarkers)
-          currentCardHeight += partHeight
-          console.log('[Pretext] Added', linesToAdd.length, 'lines to current card')
-        }
+        // 构建当前卡片的文本（每行加前缀，用换行符连接）
+        const partText = linesToAdd.map(l => l.text).join('\n')
+        const partWithMarkers = partText.split('\n').map(line => markerPrefix + line).join('\n')
+        currentCardContent.push(partWithMarkers)
+        currentCardHeight += partHeight
+        console.log('[Pretext] Added', linesToAdd.length, 'lines to current card')
 
+        // 保存当前卡片
         cards.push([...currentCardContent])
-        console.log('[Pretext] Saved current card with', currentCardContent.length, 'paragraphs')
+        console.log('[Pretext] Saved current card')
         currentCardContent = []
         currentCardHeight = 0
 
-        const remainingLines = lines.slice(maxLinesInCurrentCard)
-        if (remainingLines.length > 0) {
-          const remainingText = remainingLines.map(l => l.text).join('\n')
-          const remainingHeight = remainingLines.length * lineHeight
-          
-          if (remainingText.trim().length > 0) {
-            const remainingLinesArray = remainingText.split('\n')
-            const remainingWithMarkers = remainingLinesArray.map(line => markerPrefix + line).join('\n')
-            currentCardContent.push(remainingWithMarkers)
-            currentCardHeight = remainingHeight
-            console.log('[Pretext] Added remaining', remainingLines.length, 'lines to new card')
-          }
-        }
+        // 构建新卡片的文本
+        const remainingText = remainingLines.map(l => l.text).join('\n')
+        const remainingWithMarkers = remainingText.split('\n').map(line => markerPrefix + line).join('\n')
+        currentCardContent.push(remainingWithMarkers)
+        currentCardHeight = remainingHeight
+        console.log('[Pretext] Added remaining', remainingLines.length, 'lines to new card')
       }
     } else {
       // 剩余空间不足，直接移到新卡片
