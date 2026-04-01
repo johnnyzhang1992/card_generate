@@ -16,8 +16,7 @@ const createExportCard = (cardContent, cardStyle) => {
   const card = document.createElement('div')
   card.className = 'text-card'
   card.style.width = `${cardStyle.width}px`
-  card.style.minHeight = `${cardStyle.height}px`
-  card.style.height = 'auto' // 让高度自适应内容
+  card.style.height = `${cardStyle.height}px` // 使用固定高度确保背景图正确显示
   card.style.backgroundColor = cardStyle.backgroundColor
   card.style.padding = `${cardStyle.padding}px`
   card.style.fontFamily = cardStyle.fontFamily
@@ -32,6 +31,7 @@ const createExportCard = (cardContent, cardStyle) => {
   card.style.justifyContent = 'flex-start'
   card.style.textAlign = 'left'
   card.style.whiteSpace = 'pre-wrap'
+  card.style.overflow = 'hidden'
   
   // 添加背景图片
   if (cardStyle.backgroundImage) {
@@ -209,17 +209,18 @@ export const exportCards = async (cardStyle, cards) => {
         // 等待字体加载和布局完成
         await new Promise(resolve => setTimeout(resolve, 100))
         
-        // 获取卡片的实际高度
-        const actualHeight = exportCard.scrollHeight
+        // 使用固定高度确保背景图正确显示
+        const exportHeight = cardStyle.height
         
         // 使用html2canvas将DOM元素转换为canvas
         const canvas = await html2canvas(exportCard, {
           width: cardStyle.width,
-          height: actualHeight, // 使用实际高度而不是固定高度
+          height: exportHeight,
           scale: 3, // 提高导出图片质量
           backgroundColor: null, // 保持透明背景
           useCORS: true, // 支持跨域图片
-          allowTaint: true // 允许跨域图片
+          allowTaint: true, // 允许跨域图片
+          logging: false
         })
         
         // 触发下载

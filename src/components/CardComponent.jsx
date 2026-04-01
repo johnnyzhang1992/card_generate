@@ -157,14 +157,15 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
   
   return (
     <div
-      className="text-card bg-white  shadow-lg"
+      className="text-card bg-white shadow-lg"
       style={{
         width: cardStyle.width,
-        minHeight: cardStyle.height,
+        height: cardStyle.height,
         backgroundColor: cardStyle.backgroundColor,
         backgroundImage: cardStyle.backgroundImage ? `url(${cardStyle.backgroundImage})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
         padding: cardStyle.padding,
         color: cardStyle.textColor,
         fontSize: cardStyle.fontSize,
@@ -175,7 +176,9 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
         textAlign: 'left',
-        whiteSpace: 'pre-wrap' // 保留换行符
+        whiteSpace: 'pre-wrap',
+        overflow: 'hidden',
+        boxSizing: 'border-box'
       }}
     >
       {paragraphs.map((paragraph, i) => {

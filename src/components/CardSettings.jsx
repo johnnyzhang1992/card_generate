@@ -196,6 +196,47 @@ const CardSettings = ({ cardStyle, onCardStyleChange }) => {
             }
           </select>
         </div>
+
+        {/* 背景图上传 */}
+        <div className="space-y-2">
+          <Label>背景图片</Label>
+          <div className="flex items-center gap-2">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0]
+                if (file) {
+                  const reader = new FileReader()
+                  reader.onload = (event) => {
+                    handleStyleChange('backgroundImage', event.target.result)
+                  }
+                  reader.readAsDataURL(file)
+                }
+              }}
+              className="flex-1"
+            />
+            {cardStyle.backgroundImage && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleStyleChange('backgroundImage', '')}
+              >
+                清除
+              </Button>
+            )}
+          </div>
+          {cardStyle.backgroundImage && (
+            <div className="mt-2">
+              <img 
+                src={cardStyle.backgroundImage} 
+                alt="背景预览" 
+                className="w-full h-20 object-cover rounded border"
+              />
+            </div>
+          )}
+          <p className="text-xs text-slate-500">支持 JPG、PNG、GIF、WebP 等图片格式</p>
+        </div>
       </CardContent>
     </Card>
   )
