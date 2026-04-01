@@ -91,9 +91,6 @@ export const splitTextToCards = (text, cardStyle) => {
     const prepared = prepareWithSegments(pureText, font)
     const { height, lines } = layoutWithLines(prepared, availableWidth, lineHeight)
 
-    // 调试日志
-    console.log('[Pretext] Text:', pureText.substring(0, 20), 'Height:', height, 'Lines:', lines.length, 'Available:', availableHeight)
-
     return { height, lines, fontSize, lineSpacing }
   }
 
@@ -107,8 +104,6 @@ export const splitTextToCards = (text, cardStyle) => {
     // 使用Pretext计算这个段落需要的高度和行信息
     const paragraphMetrics = calculateParagraphWithPretext(paragraph)
 
-    console.log('[Split] Height:', paragraphMetrics.height, 'Available:', availableHeight, 'CurrentHeight:', currentCardHeight, 'WillSplit:', paragraphMetrics.height > availableHeight)
-
     // 检查当前卡片是否能容纳这个段落
     // 计算当前卡片的剩余空间
     const remainingSpace = availableHeight - currentCardHeight
@@ -116,8 +111,6 @@ export const splitTextToCards = (text, cardStyle) => {
     // 如果当前卡片有剩余空间且段落可以部分放入，也需要分割
     const needsSplit = paragraphMetrics.height > availableHeight || 
                        (remainingSpace > 0 && remainingSpace < paragraphMetrics.height)
-    
-    console.log('[Split] remainingSpace:', remainingSpace, 'needsSplit:', needsSplit)
 
     if (remainingSpace >= paragraphMetrics.height) {
       // 剩余空间足够放入整个段落
@@ -187,10 +180,9 @@ export const splitTextToCards = (text, cardStyle) => {
         remainingLines = remainingLines.slice(maxLines)
       }
     } else {
-        // 段落可以放入新卡片，直接添加整个段落
-        currentCardContent.push(paragraph)
-        currentCardHeight = paragraphMetrics.height
-      }
+      // 段落可以放入新卡片，直接添加整个段落
+      currentCardContent.push(paragraph)
+      currentCardHeight = paragraphMetrics.height
     }
   }
 
@@ -198,8 +190,6 @@ export const splitTextToCards = (text, cardStyle) => {
   if (currentCardContent.length > 0) {
     cards.push([...currentCardContent])
   }
-
-  console.log('[Result] Total cards:', cards.length, 'Cards:', cards.map(c => c.length))
 
   return cards
 }
