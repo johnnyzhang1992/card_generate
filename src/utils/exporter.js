@@ -221,12 +221,66 @@ const parseMarkdownToHtml = (text) => {
   return result
 }
 
+// Canvas压缩函数
+/**
+ * 压缩Canvas图片以减小文件尺寸
+ * @param {HTMLCanvasElement} canvas - 要压缩的Canvas元素
+ * @param {number} quality - 输出质量 (0-1)
+ * @returns {HTMLCanvasElement} 压缩后的Canvas元素
+ */
+const compressCanvas = (canvas, quality) => {
+  try {
+    const compressedCanvas = document.createElement('canvas')
+    const ctx = compressedCanvas.getContext('2d')
+
+    // 计算压缩后的尺寸
+    let width = canvas.width
+    let height = canvas.height
+
+    // 如果尺寸过大，进行缩放
+    const MAX_SIZE = 2000 // 最大边长，防止生成过大的图片
+    if (width > MAX_SIZE || height > MAX_SIZE) {
+      if (width > height) {
+        const ratio = MAX_SIZE / width
+        width = MAX_SIZE
+        height = Math.round(height * ratio)
+      } else {
+        const ratio = MAX_SIZE / height
+        height = MAX_SIZE
+        width = Math.round(width * ratio)
+      }
+    }
+
+    compressedCanvas.width = width
+    compressedCanvas.height = height
+
+    // 绘制压缩后的图片
+    ctx.drawImage(canvas, 0, 0, width, height)
+
+    return compressedCanvas
+  } catch (error) {
+    console.error('Canvas compression failed:', error)
+    // 返回原始canvas作为后备方案
+    return canvas
+  }
+}
+
 // 导出卡片为图片（使用html2canvas）
-export const exportCards = async (cardStyle, cards) => {
+/**
+ * 导出卡片为图片
+ * @param {Object} cardStyle - 卡片样式对象
+ * @param {Array} cards - 卡片内容数组
+ * @param {Object} [options] - 导出选项
+ * @param {number} [options.quality=0.8] - 图片质量 (0-1)
+ * @param {string} [options.format='image/jpeg'] - 图片格式
+ */
+export const exportCards = async (cardStyle, cards, options = {}) => {
   if (!cards || cards.length === 0) {
     console.error('没有卡片可导出')
     return
   }
+
+  const { quality = 0.8, format = 'image/jpeg' } = options
 
   // 创建导出容器
   const container = createExportContainer()
@@ -250,18 +304,21 @@ export const exportCards = async (cardStyle, cards) => {
         const canvas = await html2canvas(exportCard, {
           width: cardStyle.width,
           height: exportHeight,
-          scale: 3, // 提高导出图片质量
+          scale: 3, // 降低scale以减小图片大小
           backgroundColor: null, // 保持透明背景
           useCORS: true, // 支持跨域图片
           allowTaint: true, // 允许跨域图片
           logging: false
         })
         
+        // 压缩图片
+        const compressedCanvas = compressCanvas(canvas, quality)
+
         // 触发下载
         const timestamp = Date.now()
         const link = document.createElement('a')
-        link.download = `card_${timestamp}.png`
-        link.href = canvas.toDataURL('image/png')
+        link.download = `card_${timestamp}.${format.includes('jpeg') || format.includes('jpg') ? 'jpg' : 'png'}`
+        link.href = compressedCanvas.toDataURL(format, quality)
         link.click()
         
         // 移除已导出的卡片

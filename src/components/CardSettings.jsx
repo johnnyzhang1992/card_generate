@@ -14,7 +14,7 @@ const DEFAULT_STYLE = {
   padding: 40,
   backgroundColor: 'rgb(157,41,51)',
   backgroundImage: '/images/card_bg.png',
-  fontSize: 18,
+  fontSize: 20,
   fontFamily: 'HuiwenMingchao',
   textColor: '#ffffff',
   lineSpacing: 10,
@@ -23,13 +23,14 @@ const DEFAULT_STYLE = {
   copyrightFontSize: 10
 }
 
-// 摘录卡片样式
+// 摘录卡片样式（与默认样式的区别说明）
+// 摘录卡片使用更大的内边距和字体大小，以适合引用文本的展示需求
 const QUOTE_STYLE = {
-  padding: 56,
-  fontSize: 30,
-  copyrightBottom: 20,
-  copyrightFontSize: 18,
-  textColor: '#333333'
+  padding: 56,           // 更大的内边距，提供更好的阅读空间
+  fontSize: 30,          // 更大的字体，突出引用内容
+  copyrightBottom: 10,   // 稍微增加版权信息距底部距离
+  copyrightFontSize: 10, // 保持版权信息字号一致
+  textColor: '#333333'   // 暗色文字，适合浅色背景
 }
 
 const CardSettings = ({ cardStyle, onCardStyleChange }) => {

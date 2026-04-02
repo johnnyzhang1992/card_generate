@@ -7,24 +7,27 @@ import { exportCards } from '@/utils/exporter'
 
 import './style.css'
 
+// 默认卡片样式常量
+const DEFAULT_CARD_STYLE = {
+  width: 600,
+  height: 800,
+  padding: 40,
+  backgroundColor: 'rgb(157,41,51)',
+  backgroundImage: '/images/card_bg.png',
+  fontSize: 20,
+  fontFamily: 'HuiwenMingchao',
+  textColor: '#ffffff',
+  lineSpacing: 10,
+  // Copyright 设置
+  copyrightText: '诗词赏析 | @学古诗',
+  copyrightBottom: 5,
+  copyrightFontSize: 10
+}
+
 function App() {
   const [text, setText] = useState('')
   const [cards, setCards] = useState([])
-  const [cardStyle, setCardStyle] = useState({
-    width: 600,
-    height: 800,
-    padding: 30,
-    backgroundColor: 'rgb(157,41,51)',
-    backgroundImage: '/images/card_bg.png',
-    fontSize: 18,
-    fontFamily: 'HuiwenMingchao',
-    textColor: '#ffffff',
-    lineSpacing: 10,
-    // Copyright 设置
-    copyrightText: '诗词赏析 | @学古诗',
-    copyrightBottom: 20,
-    copyrightFontSize: 18
-  })
+  const [cardStyle, setCardStyle] = useState(DEFAULT_CARD_STYLE)
   const [scale, setScale] = useState(0.65)
 
   // 智能分割文本到多张卡片
