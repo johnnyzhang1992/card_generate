@@ -100,9 +100,9 @@ const CardSettings = ({ cardStyle, onCardStyleChange }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>卡片样式设置</CardTitle>
+        <CardTitle className='text-lg'>卡片样式设置</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {/* 快捷样式切换 */}
         <div className="flex gap-2">
           <Button

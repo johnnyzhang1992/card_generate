@@ -75,10 +75,10 @@ function App() {
       onKeyDown={handleKeyDown}>
       <div className="max-w-8xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">
             文案卡片生成器
           </h1>
-          <p className="text-slate-600">输入文案，自动生成精美的卡片</p>
+          <p className="text-slate-600 -textsm">输入文案，自动生成精美的卡片</p>
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6`}>
