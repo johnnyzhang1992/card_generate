@@ -1,4 +1,5 @@
 import React from 'react'
+import { calculateLineHeight, detectParagraphStyle } from '@/utils/textLayout'
 
 // Markdown 渲染函数
 const renderMarkdown = (text, baseStyle) => {
