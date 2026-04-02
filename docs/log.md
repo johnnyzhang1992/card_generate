@@ -1,10 +1,43 @@
-# Code Review Fixes Summary
+# Code Review Fixes and Optimization Summary
 
 ## Date
 2026-04-02
 
 ## Overview
-Completed code review and implementation of suggested fixes for the card_generate project. All identified issues have been resolved.
+Completed code review and implementation of suggested fixes for the card_generate project. All identified issues have been resolved. Additionally, optimized the text splitting logic for better space utilization while maintaining consistency between preview and export.
+
+## Optimization Details
+
+### Text Splitting Optimization (src/utils/textSplitter.js)
+
+#### Key Improvements:
+1. **Reduced Safety Margins**: 
+   - Decreased safety margin from 0.5x to 0.2x font size for more precise space utilization
+   - Reduced line height multiplier from 1.15x to 1.05x for tighter packing
+
+2. **Improved Space Utilization Algorithm**:
+   - Instead of only splitting when remaining space > 200px, now intelligently fills available space
+   - Attempts to fit as many lines as possible into remaining space before moving to new card
+   - Only moves to new card when remaining space is less than 20px (down from 200px)
+
+3. **Better Line-Level Packing**:
+   - When a paragraph doesn't fit, now tries to fit individual lines into remaining space
+   - Preserves paragraph markers and formatting during line-level splits
+   - Maintains visual consistency between preview and export
+
+#### Benefits:
+- **Better Space Utilization**: Cards are filled more completely, reducing wasted space
+- **Consistent Preview/Export**: Both use the same optimized splitting logic
+- **Maintained Readability**: Line breaks and formatting are preserved intelligently
+- **Backward Compatible**: All existing behavior preserved with improved space usage
+
+#### Technical Changes:
+- Changed `SPACE_THRESHOLD` from 200 to `MIN_REMAINING_SPACE` of 20
+- Modified paragraph splitting logic to attempt line-level packing
+- Removed verbose console logging for cleaner production code
+- Optimized the algorithm to minimize wasted space at the bottom of cards
+
+This optimization ensures that text is distributed across cards more efficiently while maintaining perfect consistency between the preview display and exported images.
 
 ## Files Modified
 
