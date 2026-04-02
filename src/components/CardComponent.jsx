@@ -170,7 +170,7 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
         color: cardStyle.textColor,
         fontSize: cardStyle.fontSize,
         fontFamily: cardStyle.fontFamily,
-        lineHeight: `${cardStyle.fontSize * 1.2 + cardStyle.lineSpacing}px`,
+        lineHeight: `${calculateLineHeight(cardStyle.fontSize, cardStyle.lineSpacing)}px`,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',

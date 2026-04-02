@@ -39,6 +39,42 @@ Completed code review and implementation of suggested fixes for the card_generat
 
 This optimization ensures that text is distributed across cards more efficiently while maintaining perfect consistency between the preview display and exported images.
 
+### Text Layout Fixes (Fixing Bottom Line Clipping Issue)
+
+#### Root Cause:
+The issue where text content was being cut off at the bottom was caused by inconsistent height calculation between:
+1. Text splitting logic (used to determine how much text fits on a card)
+2. Preview rendering (CardComponent)
+3. Export rendering (createExportCard function)
+
+Each was calculating line heights and margins differently, leading to mismatches between expected and actual text height.
+
+#### Fixes Implemented:
+1. **Created Unified Text Layout Utility** (`src/utils/textLayout.js`):
+   - Standardized line height calculation: `fontSize * 1.4 + lineSpacing`
+   - Standardized paragraph height calculation: `(lines × lineHeight) + ((lines - 1) × lineSpacing)`
+   - This accounts for both line height and the cumulative effect of margins between lines
+
+2. **Updated Preview Rendering** (`src/components/CardComponent.jsx`):
+   - Replaced hardcoded line height calculation with the standardized function
+   - Now uses: `calculateLineHeight(fontSize, lineSpacing)`
+
+3. **Updated Export Rendering** (`src/utils/exporter.js`):
+   - Replaced hardcoded line height calculation with the standardized function
+   - Now uses: `calculateLineHeight(fontSize, lineSpacing)` for both regular and empty lines
+
+4. **Updated Text Splitting Logic** (`src/utils/textSplitter.js`):
+   - Now uses the standardized height calculation functions from textLayout.js
+   - Ensures perfect consistency between predicted and actual text height
+
+#### Benefits:
+- **Fixed Bottom Line Clipping**: Text no longer gets cut off at the bottom of cards
+- **Perfect Consistency**: Preview and export now show identical text layout
+- **Accurate Space Utilization**: Text splitting now predicts actual rendered height correctly
+- **Maintainable Design**: Single source of truth for text layout calculations
+
+These fixes ensure that what you see in the preview is exactly what you get in the exported image, with no more unexpected clipping of text content.
+
 ## Files Modified
 
 ### 1. src/App.jsx
