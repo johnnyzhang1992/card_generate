@@ -5,12 +5,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Settings, Play, Download, ShieldQuestion, X } from 'lucide-react'
 
-const TextInputCard = ({ 
-  text, 
-  onTextChange, 
-  onSplitTextToCards, 
-  onExportCards, 
-  cards
+const TextInputCard = ({
+  text,
+  onTextChange,
+  onSplitTextToCards,
+  onExportCards,
+  cards,
+  onToggleFullscreen,
+  isFullscreen
 }) => {
   const [showHelp, setShowHelp] = useState(false)
   
@@ -30,6 +32,17 @@ const TextInputCard = ({
           >
             <ShieldQuestion className="w-4 h-4" />
             使用说明
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleFullscreen}
+            className="flex items-center gap-1 text-slate-600 hover:text-slate-900 ml-2"
+          >
+            {isFullscreen ? '退出全屏' : '全屏'}
+            <span className="ml-1">
+              {isFullscreen ? '⛶' : '⛶'}
+            </span>
           </Button>
         </CardTitle>
       </CardHeader>
