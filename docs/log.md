@@ -75,6 +75,8 @@ Each was calculating line heights and margins differently, leading to mismatches
 
 These fixes ensure that what you see in the preview is exactly what you get in the exported image, with no more unexpected clipping of text content.
 
+Additionally, fixed a ReferenceError where `markerPrefix` was undefined in certain code paths in the text splitting logic, ensuring robust operation under all conditions.
+
 ## Files Modified
 
 ### 1. src/App.jsx
