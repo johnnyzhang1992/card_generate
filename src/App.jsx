@@ -81,18 +81,21 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* 左侧：文案输入 */}
           <div className={`lg:col-span-3  sticky top-0 h-[calc(100vh-10rem)] ${isFullscreen ? 'lg:col-span-12' : ''}`}>
-            <div className="flex justify-end mb-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleToggleFullscreen}
-                className="text-slate-600 hover:text-slate-900"
-              >
-                {isFullscreen ? '退出全屏' : '全屏'}
-                <span className="ml-1">
-                  {isFullscreen ? '⛶' : '⛶'}
-                </span>
-              </Button>
+            <div className="flex items-center justify-between mb-2">
+              <span>输入文案</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleToggleFullscreen}
+                  className="text-slate-600 hover:text-slate-900"
+                >
+                  {isFullscreen ? '退出全屏' : '全屏'}
+                  <span className="ml-1">
+                    {isFullscreen ? '⛶' : '⛶'}
+                  </span>
+                </Button>
+              </div>
             </div>
             <TextInputCard
               text={text}
