@@ -1,4 +1,5 @@
 import html2canvas from 'html2canvas'
+import { calculateLineHeight } from '@/utils/textLayout'
 
 // 创建隐藏的导出容器
 const createExportContainer = () => {
@@ -47,7 +48,6 @@ const createExportCard = (cardContent, cardStyle) => {
   contentWrapper.style.flex = '1'
   contentWrapper.style.width = '100%'
   contentWrapper.style.overflow = 'hidden'
-  contentWrapper.style.paddingBottom = cardStyle.copyrightText ? '30px' : '0'
 
   // 添加文本内容
   cardContent.forEach((paragraph, i) => {
@@ -154,7 +154,7 @@ const createExportCard = (cardContent, cardStyle) => {
     
     // 设置容器样式
     container.style.fontSize = `${fontSize}px`
-    container.style.marginBottom = `${lineSpacing}px`
+    container.style.marginBottom = (i === cardContent.length - 1) ? '0px' : `${lineSpacing}px`
     container.style.lineHeight = `${calculateLineHeight(fontSize, lineSpacing)}px`
     if (paddingLeft > 0) {
       container.style.paddingLeft = `${paddingLeft}em`
@@ -168,8 +168,7 @@ const createExportCard = (cardContent, cardStyle) => {
     
     // 处理空行：空行显示为透明占位符
     if (paragraphText === '') {
-      container.style.height = `${calculateLineHeight(fontSize, lineSpacing)}px`
-      container.style.marginBottom = (i === cardContent.length - 1) ? '0px' : `${lineSpacing}px`
+      container.style.height = `${lineSpacing}px`
     } else {
       // 简单的 Markdown 支持：粗体、斜体、代码
       const htmlText = parseMarkdownToHtml(paragraphText.trim())

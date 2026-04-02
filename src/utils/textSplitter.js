@@ -55,7 +55,7 @@ const splitLinesAt = (lines, splitIndex) => {
 
 // 从lines数组生成带标记的文本
 const linesToText = (lines, markerPrefix) => {
-  return markerPrefix + lines.map(l => l.text).join(' ')
+  return markerPrefix + lines.map(l => l.text).join('')
 }
 
 export const splitTextToCards = (text, cardStyle) => {
@@ -63,10 +63,9 @@ export const splitTextToCards = (text, cardStyle) => {
 
   const cards = []
 
-  // 计算卡片可用区域（考虑内边距和 copyright 预留空间）
+  // 计算卡片可用区域（考虑内边距）
   const availableWidth = cardStyle.width - cardStyle.padding * 2
-  const copyrightReserve = cardStyle.copyrightText ? 30 : 0
-  const availableHeight = cardStyle.height - cardStyle.padding * 2 - copyrightReserve
+  const availableHeight = cardStyle.height - cardStyle.padding * 2
 
   let currentCardContent = []
   let currentCardHeight = 0
@@ -82,9 +81,7 @@ export const splitTextToCards = (text, cardStyle) => {
     const pureText = stripMarkdownMarkers(paragraph).trim()
 
     // 使用Pretext计算文本布局（考虑 letterSpacing）
-    const letterSpacingPx = fontSize * LETTER_SPACING
-    const effectiveWidth = availableWidth - letterSpacingPx * 10 // 预留 letterSpacing 的额外宽度
-    const { lines } = calculateTextLayout(pureText, cardStyle.fontFamily, fontSize, effectiveWidth, LETTER_SPACING)
+    const { lines } = calculateTextLayout(pureText, cardStyle.fontFamily, fontSize, availableWidth, LETTER_SPACING)
 
     // 计算段落实际占用的高度
     const paragraphHeight = calculateParagraphHeight(lines, fontSize, lineSpacing)

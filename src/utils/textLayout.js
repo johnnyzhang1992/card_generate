@@ -11,9 +11,9 @@ export const LETTER_SPACING = 0.1
  * @returns {number} 单行高度（px）
  */
 export const calculateLineHeight = (fontSize, lineSpacing) => {
-  // 行高 = 字体大小 * 1.4 + 行间距
+  // 行高 = 字体大小 * 1.2 + 行间距
   // 这个值对应于 CSS 的 line-height 属性
-  return fontSize * 1.4 + lineSpacing
+  return fontSize * 1.2 + lineSpacing
 }
 
 /**
@@ -25,14 +25,14 @@ export const calculateLineHeight = (fontSize, lineSpacing) => {
  */
 export const calculateParagraphHeight = (lines, fontSize, lineSpacing) => {
   if (lines.length === 0) {
-    // 空段落仍然占据一行的高度（用于占位）
-    return calculateLineHeight(fontSize, lineSpacing)
+    // 空段落：height + marginBottom
+    return lineSpacing * 2
   }
 
   const lineHeight = calculateLineHeight(fontSize, lineSpacing)
-  // 总高度 = (行数 × 行高) + ((行数 - 1) × 行间距)
-  // 这是因为除了最后一行外，每行都有下边距
-  return lines.length * lineHeight + (lines.length - 1) * lineSpacing
+  // 总高度 = 行数 × 行高
+  // 不加 marginBottom，由渲染层处理（最后一个段落无 marginBottom）
+  return lines.length * lineHeight
 }
 
 /**
@@ -50,64 +50,22 @@ export const calculateTextLayout = (text, fontFamily, fontSize, availableWidth, 
   }
 
   const font = `${fontSize}px ${fontFamily}`
-  const prepared = prepareWithSegments(text, font)
-  const { height, lines } = layoutWithLines(prepared, availableWidth, calculateLineHeight(fontSize, 0)) // 传入0作为lineSpacing因为我们自己计算
-
-  // 如果有 letterSpacing，需要重新计算行拆分
+  
+  // 如果有 letterSpacing，减少可用宽度以补偿
+  // letterSpacing 会使每行文本变宽，导致更多换行
+  let effectiveWidth = availableWidth
   if (letterSpacing > 0) {
     const letterSpacingPx = fontSize * letterSpacing
-    const adjustedLines = adjustLinesForLetterSpacing(lines, letterSpacingPx, availableWidth)
-    return { height, lines: adjustedLines }
+    // 保守估计：假设平均每行约20个字符
+    // 额外宽度 = (字符数 - 1) * letterSpacingPx
+    const extraWidth = 20 * letterSpacingPx
+    effectiveWidth = availableWidth - extraWidth
   }
+  
+  const prepared = prepareWithSegments(text, font)
+  const { height, lines } = layoutWithLines(prepared, effectiveWidth, calculateLineHeight(fontSize, 0)) // 传入0作为lineSpacing因为我们自己计算
 
   return { height, lines }
-}
-
-/**
- * 调整行以考虑 letterSpacing 的影响
- * 当有 letterSpacing 时，每行实际占用的宽度 = pretext测量的宽度 + (字符数-1) * letterSpacingPx
- * 需要确保调整后的行不会超过 availableWidth
- */
-const adjustLinesForLetterSpacing = (lines, letterSpacingPx, availableWidth) => {
-  if (lines.length === 0) return lines
-
-  const adjustedLines = []
-  let currentLineText = ''
-  let currentLineWidth = 0
-
-  for (const line of lines) {
-    const lineText = line.text
-    const extraWidth = Math.max(0, lineText.length - 1) * letterSpacingPx
-
-    // 如果当前行加上 letterSpacing 后不超过可用宽度，直接加入
-    if (currentLineText === '') {
-      currentLineText = lineText
-      currentLineWidth = line.width + extraWidth
-    } else {
-      // 尝试将当前行的文本合并到前一行
-      const combinedText = currentLineText + ' ' + lineText
-      const combinedExtraWidth = Math.max(0, combinedText.length - 1) * letterSpacingPx
-      // 估算合并后的宽度（这里简化处理）
-      const estimatedWidth = currentLineWidth + line.width + extraWidth
-
-      if (estimatedWidth <= availableWidth) {
-        currentLineText = combinedText
-        currentLineWidth = estimatedWidth
-      } else {
-        // 保存当前行
-        adjustedLines.push({ text: currentLineText, width: currentLineWidth })
-        currentLineText = lineText
-        currentLineWidth = line.width + extraWidth
-      }
-    }
-  }
-
-  // 保存最后一行
-  if (currentLineText) {
-    adjustedLines.push({ text: currentLineText, width: currentLineWidth })
-  }
-
-  return adjustedLines
 }
 
 /**

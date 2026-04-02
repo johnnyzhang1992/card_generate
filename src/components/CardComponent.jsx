@@ -183,7 +183,7 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
         boxSizing: 'border-box'
       }}
     >
-      <div className="flex-1 w-full overflow-hidden" style={{ paddingBottom: cardStyle.copyrightText ? '40px' : 0 }}>
+      <div className="flex-1 w-full overflow-hidden">
         {paragraphs.map((paragraph, i) => {
           // 检测段落格式并设置字体大小和间距
           let fontSize = cardStyle.fontSize
@@ -300,6 +300,7 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
             <div key={i} style={{
               marginBottom: (i === paragraphs.length - 1) ? 0 : lineSpacing,
               fontSize: `${fontSize}px`,
+              lineHeight: `${calculateLineHeight(fontSize, lineSpacing)}px`,
               paddingLeft: paddingLeft > 0 ? `${paddingLeft}em` : undefined,
               width: '100%',
               opacity: opacity,
