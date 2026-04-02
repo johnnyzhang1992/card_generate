@@ -69,32 +69,6 @@ function App() {
     }
   }
 
-  // 智能分割文本到多张卡片
-  const handleSplitTextToCards = () => {
-    const newCards = splitTextToCards(text, cardStyle)
-    setCards(newCards)
-  }
-
-  // 导出卡片为图片
-  const handleExportCards = async () => {
-    await exportCards(cardStyle, cards)
-  }
-
-  // 处理文本变化
-  const handleTextChange = (e) => {
-    setText(e.target.value)
-  }
-
-  // 处理卡片样式变化
-  const handleCardStyleChange = (newStyle) => {
-    setCardStyle(newStyle)
-  }
-
-  // 处理缩放变化
-  const handleScaleChange = (newScale) => {
-    setScale(newScale)
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6" onKeyDown={handleKeyDown}>
       <div className="max-w-8xl mx-auto">
