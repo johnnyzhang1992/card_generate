@@ -61,6 +61,16 @@ export const splitTextToCards = (text, cardStyle) => {
 
       let remainingLines = [...lines]
 
+      // 获取原始段落的标记类型
+      const getMarkerPrefix = () => {
+        if (/^\s*#\s+/.test(paragraph)) return '# '
+        if (/^\s*##\s+/.test(paragraph)) return '## '
+        if (/^\s*###\s+/.test(paragraph)) return '### '
+        if (/^\s*>\s*/.test(paragraph)) return '> '
+        return ''
+      }
+      const markerPrefix = getMarkerPrefix()
+
       // 先尝试放入当前卡片的剩余空间
       const maxLinesInCurrentCard = Math.floor(remainingSpace / calculateLineHeight(fontSize, lineSpacing))
 
@@ -123,6 +133,16 @@ export const splitTextToCards = (text, cardStyle) => {
       // 尝试将段落拆分以更好地填充剩余空间
       const lineHeight = calculateLineHeight(fontSize, lineSpacing)
       const maxLinesInCurrentCard = Math.floor(remainingSpace / lineHeight)
+
+      // 获取原始段落的标记类型
+      const getMarkerPrefix = () => {
+        if (/^\s*#\s+/.test(paragraph)) return '# '
+        if (/^\s*##\s+/.test(paragraph)) return '## '
+        if (/^\s*###\s+/.test(paragraph)) return '### '
+        if (/^\s*>\s*/.test(paragraph)) return '> '
+        return ''
+      }
+      const markerPrefix = getMarkerPrefix()
 
       if (maxLinesInCurrentCard > 0) {
         // 可以放入一些行到当前卡片
