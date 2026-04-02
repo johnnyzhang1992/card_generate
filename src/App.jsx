@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import CardPreview from '@/components/CardPreview'
 import CardSettings from '@/components/CardSettings'
 import TextInputCard from '@/components/TextInputCard'
+import { Button } from '@/components/ui/button'
 import { splitTextToCards } from '@/utils/textSplitter'
 import { exportCards } from '@/utils/exporter'
 
@@ -29,6 +30,7 @@ function App() {
   const [cards, setCards] = useState([])
   const [cardStyle, setCardStyle] = useState(DEFAULT_CARD_STYLE)
   const [scale, setScale] = useState(0.65)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   // 智能分割文本到多张卡片
   const handleSplitTextToCards = () => {
@@ -56,9 +58,21 @@ function App() {
     setScale(newScale)
   }
 
+  // 切换全屏模式
+  const handleToggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen)
+  }
+
+  // 退出全屏模式（ESC键）
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape' && isFullscreen) {
+      setIsFullscreen(false)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6" onKeyDown={handleKeyDown}>
+      <div className="max-w-8xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-slate-800 mb-2">文案卡片生成器</h1>
           <p className="text-slate-600">输入文案，自动生成精美的卡片</p>
@@ -66,7 +80,20 @@ function App() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* 左侧：文案输入 */}
-          <div className="lg:col-span-3  sticky top-0 h-[calc(100vh-10rem)]">
+          <div className={`lg:col-span-3  sticky top-0 h-[calc(100vh-10rem)] ${isFullscreen ? 'lg:col-span-12' : ''}`}>
+            <div className="flex justify-end mb-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleToggleFullscreen}
+                className="text-slate-600 hover:text-slate-900"
+              >
+                {isFullscreen ? '退出全屏' : '全屏'}
+                <span className="ml-1">
+                  {isFullscreen ? '⛶' : '⛶'}
+                </span>
+              </Button>
+            </div>
             <TextInputCard
               text={text}
               onTextChange={handleTextChange}
