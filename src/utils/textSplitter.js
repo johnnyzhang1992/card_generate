@@ -61,16 +61,6 @@ export const splitTextToCards = (text, cardStyle) => {
 
       let remainingLines = [...lines]
 
-      // 获取原始段落的标记类型
-      const getMarkerPrefix = () => {
-        if (/^\s*#\s+/.test(paragraph)) return '# '
-        if (/^\s*##\s+/.test(paragraph)) return '## '
-        if (/^\s*###\s+/.test(paragraph)) return '### '
-        if (/^\s*>\s*/.test(paragraph)) return '> '
-        return ''
-      }
-      const markerPrefix = getMarkerPrefix()
-
       // 先尝试放入当前卡片的剩余空间
       const maxLinesInCurrentCard = Math.floor(remainingSpace / calculateLineHeight(fontSize, lineSpacing))
 
