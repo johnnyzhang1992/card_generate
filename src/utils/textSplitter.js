@@ -1,12 +1,62 @@
 // 智能分割文本到多张卡片 - 使用统一文本布局计算
-import { prepareWithSegments, layoutWithLines } from '@chenglou/pretext'
+// import { prepareWithSegments, layoutWithLines } from '@chenglou/pretext'
 import {
   calculateLineHeight,
   calculateParagraphHeight,
   calculateTextLayout,
   detectParagraphStyle,
-  stripMarkdownMarkers
+  stripMarkdownMarkers,
+  LETTER_SPACING
 } from '@/utils/textLayout'
+
+// 查找最佳拆分点：在保持句子完整的前提下尽可能填满空间
+const findBestSplitPoint = (lines, maxLines) => {
+  if (lines.length <= maxLines) return lines.length
+  
+  const sentenceEndMarks = ['。', '！', '？', '!', '?', '…']
+  const clauseEndMarks = ['；', ';', '，', ',']
+  
+  // 策略：从maxLines开始向前查找最近的标点，找到就返回（最大化利用空间）
+  // 先找句子结束标点
+  for (let i = 0; i < maxLines; i++) {
+    const lineIndex = maxLines - i
+    if (lineIndex <= 0) break
+    const lastChar = (lines[lineIndex - 1]?.text || '').trim().slice(-1)
+    if (sentenceEndMarks.includes(lastChar)) return lineIndex
+  }
+  
+  // 再找分句标点
+  for (let i = 0; i < maxLines; i++) {
+    const lineIndex = maxLines - i
+    if (lineIndex <= 0) break
+    const lastChar = (lines[lineIndex - 1]?.text || '').trim().slice(-1)
+    if (clauseEndMarks.includes(lastChar)) return lineIndex
+  }
+  
+  // 最后手段：向后查找，看能否多塞一行完整句子
+  const lookaheadLimit = 3
+  for (let i = 1; i <= lookaheadLimit; i++) {
+    const lineIndex = maxLines + i
+    if (lineIndex > lines.length) break
+    const lastChar = (lines[lineIndex - 1]?.text || '').trim().slice(-1)
+    if (sentenceEndMarks.includes(lastChar)) return lineIndex
+  }
+  
+  // 实在找不到标点，只能在maxLines处截断
+  return maxLines
+}
+
+// 从lines数组重建文本，在指定位置拆分
+const splitLinesAt = (lines, splitIndex) => {
+  const firstPart = lines.slice(0, splitIndex)
+  const secondPart = lines.slice(splitIndex)
+  return { firstPart, secondPart }
+}
+
+// 从lines数组生成带标记的文本
+const linesToText = (lines, markerPrefix) => {
+  return markerPrefix + lines.map(l => l.text).join(' ')
+}
 
 export const splitTextToCards = (text, cardStyle) => {
   if (!text.trim()) return []
@@ -15,7 +65,7 @@ export const splitTextToCards = (text, cardStyle) => {
 
   // 计算卡片可用区域（考虑内边距和 copyright 预留空间）
   const availableWidth = cardStyle.width - cardStyle.padding * 2
-  const copyrightReserve = cardStyle.copyrightText ? 40 : 0
+  const copyrightReserve = cardStyle.copyrightText ? 30 : 0
   const availableHeight = cardStyle.height - cardStyle.padding * 2 - copyrightReserve
 
   let currentCardContent = []
@@ -31,8 +81,10 @@ export const splitTextToCards = (text, cardStyle) => {
     // 移除 markdown 标记以获取纯文本用于计算宽度
     const pureText = stripMarkdownMarkers(paragraph).trim()
 
-    // 使用Pretext计算文本布局
-    const { lines } = calculateTextLayout(pureText, cardStyle.fontFamily, fontSize, availableWidth)
+    // 使用Pretext计算文本布局（考虑 letterSpacing）
+    const letterSpacingPx = fontSize * LETTER_SPACING
+    const effectiveWidth = availableWidth - letterSpacingPx * 10 // 预留 letterSpacing 的额外宽度
+    const { lines } = calculateTextLayout(pureText, cardStyle.fontFamily, fontSize, effectiveWidth, LETTER_SPACING)
 
     // 计算段落实际占用的高度
     const paragraphHeight = calculateParagraphHeight(lines, fontSize, lineSpacing)
@@ -58,21 +110,26 @@ export const splitTextToCards = (text, cardStyle) => {
         return ''
       }
       const markerPrefix = getMarkerPrefix()
+      const lineHeight = calculateLineHeight(fontSize, lineSpacing)
 
       let remainingLines = [...lines]
 
       // 先尝试放入当前卡片的剩余空间
-      const maxLinesInCurrentCard = Math.floor(remainingSpace / calculateLineHeight(fontSize, lineSpacing))
+      const maxLinesInCurrentCard = Math.floor(remainingSpace / lineHeight)
 
       if (maxLinesInCurrentCard > 0) {
-        const linesToAdd = remainingLines.slice(0, maxLinesInCurrentCard)
-        const partText = linesToAdd.map(l => l.text).join(' ')
-        const partWithMarker = markerPrefix + partText
-        currentCardContent.push(partWithMarker)
-        currentCardHeight += calculateParagraphHeight(linesToAdd, fontSize, lineSpacing)
+        // 使用智能拆分点查找
+        const splitIndex = findBestSplitPoint(remainingLines, maxLinesInCurrentCard)
+        const { firstPart, secondPart } = splitLinesAt(remainingLines, splitIndex)
+        
+        if (firstPart.length > 0) {
+          const partText = linesToText(firstPart, markerPrefix)
+          currentCardContent.push(partText)
+          currentCardHeight += calculateParagraphHeight(firstPart, fontSize, lineSpacing)
+        }
+        
+        remainingLines = secondPart
       }
-
-      remainingLines = remainingLines.slice(maxLinesInCurrentCard)
 
       // 保存当前卡片（如果有内容）
       if (currentCardContent.length > 0) {
@@ -83,18 +140,19 @@ export const splitTextToCards = (text, cardStyle) => {
 
       // 如果还有剩余行，创建新卡片继续放入
       while (remainingLines.length > 0) {
-        const remainingHeightInNewCard = availableHeight
-        const maxLines = Math.floor(remainingHeightInNewCard / calculateLineHeight(fontSize, lineSpacing))
+        const maxLines = Math.floor(availableHeight / lineHeight)
 
         if (maxLines <= 0) break
 
-        const linesToAdd = remainingLines.slice(0, maxLines)
-        const partText = linesToAdd.map(l => l.text).join(' ')
-        const partWithMarker = markerPrefix + partText
-        currentCardContent.push(partWithMarker)
-        currentCardHeight += calculateParagraphHeight(linesToAdd, fontSize, lineSpacing)
+        // 使用智能拆分点查找
+        const splitIndex = findBestSplitPoint(remainingLines, maxLines)
+        const { firstPart, secondPart } = splitLinesAt(remainingLines, splitIndex)
+        
+        const partText = linesToText(firstPart, markerPrefix)
+        currentCardContent.push(partText)
+        currentCardHeight += calculateParagraphHeight(firstPart, fontSize, lineSpacing)
 
-        remainingLines = remainingLines.slice(maxLines)
+        remainingLines = secondPart
 
         // 如果还有剩余行，保存当前卡片并继续
         if (remainingLines.length > 0) {
@@ -135,30 +193,28 @@ export const splitTextToCards = (text, cardStyle) => {
       const markerPrefix = getMarkerPrefix()
 
       if (maxLinesInCurrentCard > 0) {
-        // 可以放入一些行到当前卡片
-        const linesToAdd = lines.slice(0, Math.min(maxLinesInCurrentCard, lines.length))
-        const remainingLines = lines.slice(Math.min(maxLinesInCurrentCard, lines.length))
+        // 使用智能拆分点查找
+        const splitIndex = findBestSplitPoint(lines, maxLinesInCurrentCard)
+        const { firstPart, secondPart } = splitLinesAt(lines, splitIndex)
 
-        if (linesToAdd.length > 0) {
-          const partText = linesToAdd.map(l => l.text).join(' ')
-          const partWithMarker = markerPrefix + partText
-          currentCardContent.push(partWithMarker)
-          currentCardHeight += calculateParagraphHeight(linesToAdd, fontSize, lineSpacing)
+        if (firstPart.length > 0) {
+          const partText = linesToText(firstPart, markerPrefix)
+          currentCardContent.push(partText)
+          currentCardHeight += calculateParagraphHeight(firstPart, fontSize, lineSpacing)
         }
 
         // 如果当前卡片已经接近满了，保存它
-        if (availableHeight - currentCardHeight < calculateLineHeight(fontSize, lineSpacing) * 1.5) {
+        if (availableHeight - currentCardHeight < lineHeight * 1.5) {
           cards.push([...currentCardContent])
           currentCardContent = []
           currentCardHeight = 0
         }
 
         // 处理剩余的行
-        if (remainingLines.length > 0) {
-          const remainingText = remainingLines.map(l => l.text).join(' ')
-          const remainingWithMarker = markerPrefix + remainingText
+        if (secondPart.length > 0) {
+          const remainingWithMarker = linesToText(secondPart, markerPrefix)
           currentCardContent.push(remainingWithMarker)
-          currentCardHeight = calculateParagraphHeight(remainingLines, fontSize, lineSpacing)
+          currentCardHeight = calculateParagraphHeight(secondPart, fontSize, lineSpacing)
         }
       } else {
         // 即使一行也放不下，也移到新卡片（这种情况应该很少发生）

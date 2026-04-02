@@ -38,6 +38,11 @@ const CardSettings = ({ cardStyle, onCardStyleChange }) => {
   const [activeStyle, setActiveStyle] = useState('default') // 'default' | 'quote'
   const textColorOptions = ['#ffffff', '#333333']
   const bgColorOptions = ['rgb(5, 119, 72)', 'rgb(157, 41, 51)', 'rgb(255, 255, 255)']
+  const defaultBackgroundImages = [
+    { url: '/images/card_bg.png', name: '背景1' },
+    { url: '/images/card_bg1.png', name: '背景2' },
+    { url: '/images/card_bg2.png', name: '背景3' },
+  ]
 
   // 从 localStorage 加载最近使用的背景色
   useEffect(() => {
@@ -264,6 +269,30 @@ const CardSettings = ({ cardStyle, onCardStyleChange }) => {
         {/* 背景图上传 */}
         <div className="space-y-2">
           <Label>背景图片</Label>
+          {/* 默认背景图选项 */}
+          <div className="grid grid-cols-3 gap-2">
+            {defaultBackgroundImages.map((bg, index) => (
+              <button
+                key={index}
+                onClick={() => handleStyleChange('backgroundImage', bg.url)}
+                className={`relative rounded border-2 overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-offset-1 hover:ring-blue-500 ${
+                  cardStyle.backgroundImage === bg.url
+                    ? 'border-blue-500 ring-2 ring-blue-500'
+                    : 'border-gray-200'
+                }`}
+              >
+                <img
+                  src={bg.url}
+                  alt={bg.name}
+                  className="w-full h-16 object-cover"
+                />
+                <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs text-center py-0.5">
+                  {bg.name}
+                </span>
+              </button>
+            ))}
+          </div>
+          {/* 本地上传 */}
           <div className="flex items-center gap-2">
             <Input
               type="file"

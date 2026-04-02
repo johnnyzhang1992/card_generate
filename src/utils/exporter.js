@@ -47,7 +47,7 @@ const createExportCard = (cardContent, cardStyle) => {
   contentWrapper.style.flex = '1'
   contentWrapper.style.width = '100%'
   contentWrapper.style.overflow = 'hidden'
-  contentWrapper.style.paddingBottom = cardStyle.copyrightText ? '40px' : '0'
+  contentWrapper.style.paddingBottom = cardStyle.copyrightText ? '30px' : '0'
 
   // 添加文本内容
   cardContent.forEach((paragraph, i) => {

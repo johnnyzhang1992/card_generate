@@ -172,6 +172,7 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
         fontSize: cardStyle.fontSize,
         fontFamily: cardStyle.fontFamily,
         lineHeight: `${calculateLineHeight(cardStyle.fontSize, cardStyle.lineSpacing)}px`,
+        letterSpacing: '0.1em',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'flex-start',
@@ -300,8 +301,6 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
               marginBottom: (i === paragraphs.length - 1) ? 0 : lineSpacing,
               fontSize: `${fontSize}px`,
               paddingLeft: paddingLeft > 0 ? `${paddingLeft}em` : undefined,
-              letterSpacing: '0.1em',
-              lineHeight: `${fontSize * 1.4 + lineSpacing}px`,
               width: '100%',
               opacity: opacity,
               textAlign: textAlign
