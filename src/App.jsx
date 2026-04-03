@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import CardPreview from "@/components/CardPreview";
 import CardSettings from "@/components/CardSettings";
 import TextInputCard from "@/components/TextInputCard";
+import HelpModal from "@/components/HelpModal";
 import { splitTextToCards } from "@/utils/textSplitter";
 import { exportCards } from "@/utils/exporter";
 
@@ -30,6 +31,7 @@ function App() {
   const [cardStyle, setCardStyle] = useState(DEFAULT_CARD_STYLE);
   const [scale, setScale] = useState(0.5);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // 智能分割文本到多张卡片
   const handleSplitTextToCards = () => {
@@ -93,6 +95,7 @@ function App() {
               cards={cards}
               onToggleFullscreen={handleToggleFullscreen}
               isFullscreen={isFullscreen}
+              onShowHelp={() => setShowHelp(true)}
             />
           </div>
 
@@ -119,6 +122,7 @@ function App() {
           </div>
         </div>
       </div>
+      <HelpModal showHelp={showHelp} setShowHelp={setShowHelp} />
     </div>
   );
 }

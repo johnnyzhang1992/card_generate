@@ -200,14 +200,12 @@ export const splitTextToCards = (text, cardStyle) => {
           currentCardHeight += calculateParagraphHeight(firstPart, fontSize, lineSpacing)
         }
 
-        // 如果当前卡片已经接近满了，保存它
-        if (availableHeight - currentCardHeight < lineHeight * 1.5) {
-          cards.push([...currentCardContent])
-          currentCardContent = []
-          currentCardHeight = 0
-        }
+        // 保存当前卡片
+        cards.push([...currentCardContent])
+        currentCardContent = []
+        currentCardHeight = 0
 
-        // 处理剩余的行
+        // 处理剩余的行，放入新卡片
         if (secondPart.length > 0) {
           const remainingWithMarker = linesToText(secondPart, markerPrefix)
           currentCardContent.push(remainingWithMarker)

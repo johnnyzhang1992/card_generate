@@ -96,7 +96,7 @@ export const detectParagraphStyle = (paragraph, cardStyle) => {
   // 检测引用格式（可以与其他格式组合）
   const quotePattern = /^\s*>\s*/
   if (quotePattern.test(paragraph)) {
-    fontSize = cardStyle.fontSize * 0.9
+    fontSize = cardStyle.fontSize * 0.8
     lineSpacing = cardStyle.lineSpacing * 0.5
   }
 

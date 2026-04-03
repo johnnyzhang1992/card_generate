@@ -225,7 +225,7 @@ const CardComponent = ({ cardContent, index, cardStyle }) => {
           const quotePattern = /^\s*>\s*/
           if (quotePattern.test(paragraphText)) {
             // 字体0.9倍，透明度0.85，间距0.5倍
-            fontSize = cardStyle.fontSize * 0.9
+            fontSize = cardStyle.fontSize * 0.8
             opacity = 0.8
             lineSpacing = cardStyle.lineSpacing * 0.5
             // 移除>标记
