@@ -279,7 +279,7 @@ export const exportCards = async (cardStyle, cards, options = {}) => {
     return
   }
 
-  const { quality = 0.8, format = 'image/jpeg' } = options
+  const { quality = 0.9, format = 'image/jpeg' } = options
 
   // 创建导出容器
   const container = createExportContainer()
